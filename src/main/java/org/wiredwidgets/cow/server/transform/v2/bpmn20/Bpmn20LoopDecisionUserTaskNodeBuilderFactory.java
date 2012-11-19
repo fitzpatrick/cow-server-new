@@ -19,16 +19,25 @@
  * and open the template in the editor.
  */
 
-package org.wiredwidgets.cow.server.transform.v2;
+package org.wiredwidgets.cow.server.transform.v2.bpmn20;
+
+import org.wiredwidgets.cow.server.api.model.v2.Loop;
+import org.wiredwidgets.cow.server.transform.v2.NodeType;
+import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
 /**
- * Logical node types independent of notation system
+ *
  * @author JKRANES
  */
-public enum NodeType {
+public class Bpmn20LoopDecisionUserTaskNodeBuilderFactory extends Bpmn20NodeBuilderFactory<Bpmn20DecisionUserTaskNodeBuilder, Loop> {
 
-    START, END, TASK, DECISION_TASK, LOOP_TASK, SERVICE_TASK, DIVERGING_PARALLEL_GATEWAY, CONVERGING_PARALLEL_GATEWAY,
-    DIVERGING_EXCLUSIVE_GATEWAY, CONVERGING_EXCLUSIVE_GATEWAY,
-    DIVERGING_COMPLEX_GATEWAY, CONVERGING_COMPLEX_GATEWAY, EXIT, SUBPROCESS
-
+    public Bpmn20LoopDecisionUserTaskNodeBuilderFactory() {
+        super(NodeType.LOOP_TASK);
+    }
+    
+    @Override
+    public Bpmn20DecisionUserTaskNodeBuilder createNodeBuilder(ProcessContext context, Loop loop) {
+        return new Bpmn20DecisionUserTaskNodeBuilder(context, loop);
+    }
+    
 }

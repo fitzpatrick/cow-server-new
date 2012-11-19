@@ -48,10 +48,7 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
              
         source.setKey(t.getName());
         t.setName(source.getName());
-
-        // handle assignment
-        addPotentialOwner(t, getOwnerName(source));
-        
+           
         t.setIoSpecification(ioSpec);     
         ioSpec.getInputSets().add(inputSet);       
         ioSpec.getOutputSets().add(outputSet);
@@ -61,12 +58,24 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         addDataInput("Comment", source.getDescription());
         addDataInput("Skippable", "false");
         addDataInput("TaskName", source.getName());
+        
+        if (source.getCandidateGroups() != null) {
+        	addDataInput("GroupId", source.getCandidateGroups());
+        }   
+        
+        // handle assignment
+        addPotentialOwner(t, source.getAssignee());
+        
 
     }
 
     @Override
     protected JAXBElement<TUserTask> createNode() {
         return factory.createUserTask(getNode());
+    }
+    
+    private void addGroupAssginment(TUserTask t, String groupName) {
+    	
     }
       
     private void addPotentialOwner(TUserTask t, String ownerName) {
@@ -80,19 +89,7 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         owner.setResourceAssignmentExpression(resourceExpr);
         t.getResourceRoles().add(factory.createPotentialOwner(owner));       
     }
-    
-    private String getOwnerName(Task source) {
-        String ownerName = null;
-        if (source.getAssignee() != null) {
-            ownerName = source.getAssignee();
-        } else if (source.getCandidateUsers() != null) {
-            ownerName = getActivity().getCandidateUsers();
-        } else if (source.getCandidateGroups() != null) {
-            ownerName = source.getCandidateGroups();
-        }
-        return ownerName;
-    }
-    
+  
     private String getInputRefName(String name) {
         return getNode().getId() + "_" + name + "Input"; // JBPM naming convention
     }

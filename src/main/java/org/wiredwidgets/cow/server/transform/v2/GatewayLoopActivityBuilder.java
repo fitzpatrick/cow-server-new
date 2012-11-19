@@ -42,12 +42,15 @@ public class GatewayLoopActivityBuilder extends ActivityBuilderImpl<Loop> {
         setLinkTarget(convergingGatewayBuilder);
 
         ActivityBuilder activityBuilder = createActivityBuilder(source.getActivity().getValue());
+             
         activityBuilder.build(this);
         convergingGatewayBuilder.link(activityBuilder);
 
         // Following the Activity we insert a Task for making a decision
         // whether to repeat the Activity or continue
-        ActivityBuilder loopTaskBuilder = createActivityBuilder(source.getLoopTask());
+        
+        // ActivityBuilder loopTaskBuilder = createActivityBuilder(source.getLoopTask());
+        NodeBuilder loopTaskBuilder = createNodeBuilder(getContext(), source, NodeType.LOOP_TASK);
         loopTaskBuilder.build(this);
 
         // Use a named transition for the continue path
@@ -59,6 +62,11 @@ public class GatewayLoopActivityBuilder extends ActivityBuilderImpl<Loop> {
 
         // following the task we have a diverging gateway
         NodeBuilder divergingGatewayBuilder = this.createNodeBuilder(getContext(), source, NodeType.DIVERGING_EXCLUSIVE_GATEWAY);
+        
+        
+        // a bit of a hack to inject the name of the decision variable into the gateway builder
+        divergingGatewayBuilder.setBuildProperty("decisionVar", loopTaskBuilder.getBuildProperty("decisionVar"));     
+                   
         divergingGatewayBuilder.build(this);
 
         loopTaskBuilder.link(divergingGatewayBuilder);

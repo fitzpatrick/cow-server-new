@@ -16,13 +16,18 @@
 package org.wiredwidgets.cow.server.convert;
 
 import java.util.Map;
-import java.util.Set;
+
 import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.apache.log4j.Logger;
+import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
+import org.jbpm.task.Content;
+import org.jbpm.task.utils.ContentMarshallerHelper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 
 /**
  *
@@ -31,8 +36,13 @@ import org.springframework.core.convert.converter.Converter;
 public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Converter<org.jbpm.task.query.TaskSummary, Task> {
 
     // NOTE: Autowiring does not work here!
-    // @Autowired
-    org.wiredwidgets.cow.server.service.TaskService cowTaskService = null;
+    @Autowired
+    org.jbpm.task.TaskService taskClient;
+    
+    @Autowired
+    MinaHTWorkItemHandler minaWorkItemHandler;
+    
+    private static Logger log = Logger.getLogger(JbpmTaskSummaryToSc2Task.class);
 
     @Override
     public Task convert(org.jbpm.task.query.TaskSummary source) {
@@ -55,6 +65,16 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
         }
         target.setId(String.valueOf(source.getId()));
         target.setPriority(new Integer(source.getPriority()));
+        
+        org.jbpm.task.Task task = taskClient.getTask(source.getId());
+        
+        Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());
+        
+        Object result = ContentMarshallerHelper.unmarshall("org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", content.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
+        Map<?,?> map = (Map<?,?>)result;
+        for (Map.Entry<?,?> entry : map.entrySet()){
+            log.debug(entry.getKey() + " = " + entry.getValue());
+        }        
 
         // add variables
         /*Set<String> names = taskService.getVariableNames(source.getId());

@@ -39,5 +39,5 @@ public class Bpmn20DecisionUserTaskNodeBuilderFactory extends Bpmn20NodeBuilderF
     public Bpmn20DecisionUserTaskNodeBuilder createNodeBuilder(ProcessContext context, Decision decision) {
         return new Bpmn20DecisionUserTaskNodeBuilder(context, decision);
     }
-
+    
 }

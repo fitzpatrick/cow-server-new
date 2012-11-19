@@ -11,6 +11,7 @@ import java.util.Map;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.log4j.Logger;
 import org.jbpm.task.Content;
 import org.jbpm.task.Deadline;
 import org.jbpm.task.Deadlines;
@@ -38,6 +39,8 @@ import org.wiredwidgets.cow.server.api.service.Task;
 @Transactional
 @Component
 public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskService {
+	
+	private static Logger log = Logger.getLogger(TaskServiceImpl.class);
 
     //private static TypeDescriptor JBPM_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.task.Participation.class));
     private static TypeDescriptor COW_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Participation.class));
@@ -82,7 +85,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 
     @Override
     public void completeTask(Long id, String assignee, String outcome, Map<String, Object> results) {
-        System.out.println(assignee + " starting task with ID: " + id);
+        log.debug(assignee + " starting task with ID: " + id);
         
         taskClient.start(id, assignee);
         
@@ -93,7 +96,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         Object result = ContentMarshallerHelper.unmarshall("org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", content.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
         Map<?,?> map = (Map<?,?>)result;
         for (Map.Entry<?,?> entry : map.entrySet()){
-            System.out.println(entry.getKey() + " = " + entry.getValue());
+            log.debug(entry.getKey() + " = " + entry.getValue());
         }
         //Map<String, Object> contentObj = (Map<String, Object>)map.get("content");
        // contentObj.put("testvar", "winning");
