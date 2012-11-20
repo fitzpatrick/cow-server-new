@@ -55,6 +55,7 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         
         // standard JBPM inputs
         addDataInput("Content");
+        addDataOutput("Content", false);
         addDataInput("Comment", source.getDescription());
         addDataInput("Skippable", "false");
         addDataInput("TaskName", source.getName());

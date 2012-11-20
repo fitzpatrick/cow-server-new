@@ -89,13 +89,32 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());
         
         Object result = ContentMarshallerHelper.unmarshall("org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", content.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
-        Map<?,?> map = (Map<?,?>)result;
-        for (Map.Entry<?,?> entry : map.entrySet()){
+        Map<String, Object> map = (Map<String, Object>)result;
+        
+        for (Map.Entry<String, Object> entry : map.entrySet()){
             log.debug(entry.getKey() + " = " + entry.getValue());
         }
+        
         //Map<String, Object> contentObj = (Map<String, Object>)map.get("content");
        // contentObj.put("testvar", "winning");
         //results.put("content", contentObj);
+        
+        // put Outcome into the map as "Decision"
+        if (map.get("DecisionVarName") != null) {
+        	map.put((String)map.get("DecisionVarName"), outcome);
+        }
+            
+        
+        
+        if (results != null && results.size() > 0) {
+        	Map<String, Object> contentMap = (Map<String, Object>) (map.get("Content"));
+        	if (contentMap == null) {
+        		contentMap = new HashMap<String, Object>();
+        	}       
+        	// other variables
+        	contentMap.putAll(results);
+    	}
+        
         ContentData contentData = ContentMarshallerHelper.marshal(results, minaWorkItemHandler.getMarshallerContext(), null);
         
         taskClient.complete(id, assignee, contentData);

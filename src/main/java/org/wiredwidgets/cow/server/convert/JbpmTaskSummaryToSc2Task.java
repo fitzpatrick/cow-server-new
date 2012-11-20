@@ -15,7 +15,9 @@
  */
 package org.wiredwidgets.cow.server.convert;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -66,15 +68,24 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
         target.setId(String.valueOf(source.getId()));
         target.setPriority(new Integer(source.getPriority()));
         
-        org.jbpm.task.Task task = taskClient.getTask(source.getId());
+        // add task outcomes using the "Options" variable from the task
+        org.jbpm.task.Task task = taskClient.getTask(source.getId());        
+        Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());      
+        Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
+        		"org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", 
+        		content.getContent(), 
+        		minaWorkItemHandler.getMarshallerContext(), null);     
+        String[] options = ( (String) map.get("Options") ).split(",");
+        target.getOutcomes().addAll(Arrays.asList(options));
         
-        Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());
-        
-        Object result = ContentMarshallerHelper.unmarshall("org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", content.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
-        Map<?,?> map = (Map<?,?>)result;
-        for (Map.Entry<?,?> entry : map.entrySet()){
-            log.debug(entry.getKey() + " = " + entry.getValue());
-        }        
+        // get ad-hoc variables from the "Content" map
+       
+        Map<String, Object> contentMap = (Map<String, Object>) map.get("Content");
+        if (contentMap != null) {
+	        for (Entry<String, Object> entry : contentMap.entrySet()) {
+	        	addVariable(target, entry.getKey(), entry.getValue());
+	        }
+        }
 
         // add variables
         /*Set<String> names = taskService.getVariableNames(source.getId());
@@ -137,6 +148,18 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
         }*/
 
         return target;
+    }
+    
+    private void addVariable(Task task, String key, Object value) {
+        Variable var = new Variable();
+        var.setName(key);
+        // Support strings only.  Other types will cause ClassCastException
+        try {
+            var.setValue((String)value);
+        } catch (ClassCastException e) {
+            var.setValue("Variable type " + value.getClass().getName() + " is not supported");
+        }    	
+        addVariable(task, var);
     }
 
     private void addVariable(Task task, Variable var) {
