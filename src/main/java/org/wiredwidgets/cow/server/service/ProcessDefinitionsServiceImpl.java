@@ -52,7 +52,7 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     @Override
     public List<ProcessDefinition> findAllProcessDefinitions() {
         // return this.convertProcessDefinitions(repositoryService.createProcessDefinitionQuery().list());
-    	throw new UnsupportedOperationException("Not supported yet.");
+    	return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
 
@@ -60,7 +60,7 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     @Override
     public List<ProcessDefinition> findProcessDefinitionsByKey(String key) {
         // return this.convertProcessDefinitions(repositoryService.createProcessDefinitionQuery().processDefinitionKey(key).list());
-    	throw new UnsupportedOperationException("Not supported yet.");
+    	return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     @Override
@@ -73,7 +73,7 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     public ProcessDefinition findLatestVersionProcessDefinitionByKey(String key) {
 //        List<org.jbpm.api.ProcessDefinition> defs = this.filterLatestVersions(repositoryService.createProcessDefinitionQuery().processDefinitionKey(key).list());
 //        return (defs.isEmpty()? null : this.converter.convert(defs.get(0), ProcessDefinition.class) );
-    	throw new UnsupportedOperationException("Not supported yet.");
+    	return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /** Finds the latest version of each process definition
@@ -93,7 +93,7 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     @Override
     public ProcessDefinition getProcessDefinition(String id) {
         // return this.converter.convert(repositoryService.createProcessDefinitionQuery().processDefinitionId(id).uniqueResult(), ProcessDefinition.class);
-    	throw new UnsupportedOperationException("Not supported yet.");
+    	return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     private List<ProcessDefinition> getDefsFromRem2() {

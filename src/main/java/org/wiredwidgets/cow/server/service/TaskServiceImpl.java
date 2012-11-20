@@ -75,7 +75,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public HistoryTask getHistoryTask(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -164,74 +164,74 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Override
     public List<Task> findAllTasksByProcessInstance(Long id) {
 
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasksByProcessKey(Long id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void addTaskParticipatingGroup(Long taskId, String groupId, String type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void addTaskParticipatingUser(Long taskId, String userId, String type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<Participation> getTaskParticipations(Long taskId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void removeTaskParticipatingGroup(Long taskId, String groupId, String type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void removeTaskParticipatingUser(Long taskId, String userId, String type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void removeTaskAssignment(Long taskId) {
 
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<HistoryTask> getHistoryTasks(String assignee, Date startDate, Date endDate) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<HistoryTask> getHistoryTasks(String processId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<HistoryActivity> getHistoryActivities(String processInstanceId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Task> findOrphanedTasks() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public Activity getWorkflowActivity(String processInstanceId, String key) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private Date convert(XMLGregorianCalendar source) {
