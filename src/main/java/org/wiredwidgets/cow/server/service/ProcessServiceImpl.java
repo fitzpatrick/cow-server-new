@@ -228,7 +228,8 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     
     private Deployment createDeployment(Definitions definitions) {
     	Deployment d = new Deployment();
-    	d.setId(definitions.getId());
+        
+    	d.setId(definitions.getRootElements().get(0).getValue().getId());
     	d.setName(definitions.getName());
     	d.setState("active");
     	return d;

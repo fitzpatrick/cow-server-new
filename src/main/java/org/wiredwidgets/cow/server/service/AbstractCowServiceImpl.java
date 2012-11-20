@@ -4,7 +4,9 @@
  */
 package org.wiredwidgets.cow.server.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.drools.KnowledgeBase;
@@ -42,10 +44,13 @@ public class AbstractCowServiceImpl {
     protected org.jbpm.task.TaskService taskClient;
     
     @Autowired
-    protected HashMap userGroups;
+    protected HashMap<String,List<String>> userGroups;
     
     @Autowired
     protected MinaHTWorkItemHandler minaWorkItemHandler;
+    
+    @Autowired
+    protected ArrayList<String> groups;
     
     //@Autowired
     //protected org.jbpm.task.service.TaskServiceSession jbpmTaskServiceSession;

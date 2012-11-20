@@ -88,7 +88,6 @@
         <property name="username" value="${datasource.username}"/>
         <property name="password" value="${datasource.password}" />-->
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-        <!--<property name="url" value="jdbc:h2:mem:jbpm"/>-->
         <property name="url" value="jdbc:mysql://localhost/jbpm5" />
         <property name="username" value="jbpm5"/>
         <property name="password" value="jbpm5" />
@@ -105,9 +104,12 @@
     
     <bean id="userGroups" class="java.util.HashMap" />
     
+    <bean id="groups" class="java.util.ArrayList" />
+    
     <bean id="taskServiceSessionManager" class="org.wiredwidgets.cow.server.manager.TaskServiceSessionManagerImpl" init-method="init" >
         <property name="jbpmTaskService" ref="jbpmTaskService" />
         <property name="userGroups" ref="userGroups" />
+        <property name="groups" ref="groups" />
     </bean>
       
     <bean id="minaTaskServer" class="org.jbpm.task.service.mina.MinaTaskServer" c:service-ref="jbpmTaskService" destroy-method="stop" />
@@ -144,14 +146,22 @@
 
     <jbpm:kbase id="kBase" node="node1"/>
     
-    <jbpm:ksession id="kSession" type="stateful" kbase="kBase" node="node1">
+    <bean id="knowledgeSessionFactory" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionFactory" >
+       <!-- <constructor-arg ref="kBase" />
+        <constructor-arg ref="emf" />
+        <constructor-arg ref="txManager" />-->
+    </bean>
+    
+    <bean id="kSession" factory-bean="knowledgeSessionFactory" factory-method="createInstance" />
+    
+    <!--<jbpm:ksession id="kSession" type="stateful" kbase="kBase" node="node1">
         <jbpm:configuration>
             <jbpm:jpa-persistence>
                 <jbpm:transaction-manager ref="txManager"/>
                 <jbpm:entity-manager-factory ref="emf"/>
             </jbpm:jpa-persistence>
         </jbpm:configuration>
-    </jbpm:ksession>
+    </jbpm:ksession>-->
     
     <bean id="minaWorkItemHandler" class="org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler" >
         <constructor-arg><null/></constructor-arg>
@@ -160,6 +170,8 @@
     <bean id="kSessionManager" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionManager" init-method="init">
         <property name="kSession" ref="kSession" />
         <property name="minaWorkItemHandler" ref="minaWorkItemHandler" />
+        <property name="kBase" ref="kBase" />
+        <property name="emf" ref="emf" />
     </bean>
     
     <bean id="testJBPMEventListener" class="org.wiredwidgets.cow.server.listener.TestJBPMEventListener">

@@ -102,12 +102,6 @@ public class TasksController {
         }
     }
 
-    @RequestMapping("/test/humanvars")
-    @ResponseBody
-    public void testHumanVars(HttpServletResponse response) {
-        //testHumanVars.testHumanVars();
-    }
-
     /**
      * Mark a task as complete The choice of DELETE here is based on the fact
      * that this action causes the resource (i.e. task) to be removed from its
@@ -148,7 +142,6 @@ public class TasksController {
                     varMap.put(split[0], split[1]);
                 }
             }
-            //testHumanVars.completeTask(Long.valueOf(id), task.getAssignee(), varMap);
             log.debug("Completing task: id=" + id + " outcome=" + outcome);
             log.debug("Vars: " + varMap);
 
@@ -200,12 +193,14 @@ public class TasksController {
     @RequestMapping(value = "/active/{id}", method = RequestMethod.POST)
     public void updateTask(@PathVariable("id") String id, @RequestBody Task task, HttpServletResponse response) {
         // use ID from the URL
-        /*
-         * if (task.getId() == null || !task.getId().equals(id)) {
-         * task.setId(id); } this.taskService.updateTask(task);
-         * response.setStatus(HttpServletResponse.SC_NO_CONTENT);
-         */
-        throw new UnsupportedOperationException("Not supported yet.");
+        
+        if (task.getId() == null || !task.getId().equals(id)) {
+            task.setId(id); 
+        } 
+        this.taskService.updateTask(task);
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+       
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -216,11 +211,9 @@ public class TasksController {
     @RequestMapping("/active")
     @ResponseBody
     public Tasks getAllTasks() {
-        /*
-         * Tasks tasks = new Tasks();
-         * tasks.getTasks().addAll(taskService.findAllTasks()); return tasks;
-         */
-        throw new UnsupportedOperationException("Not supported yet.");
+        Tasks tasks = new Tasks();
+        tasks.getTasks().addAll(taskService.findAllTasks()); 
+        return tasks;
     }
 
     /**
@@ -264,12 +257,12 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "unassigned=true")
     @ResponseBody
     public Tasks getUnassignedTasks() {
-        /*
-         * Tasks tasks = new Tasks();
-         * tasks.getTasks().addAll(taskService.findAllUnassignedTasks()); return
-         * tasks;
-         */
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        Tasks tasks = new Tasks();
+        tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
+        return tasks;
+
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**

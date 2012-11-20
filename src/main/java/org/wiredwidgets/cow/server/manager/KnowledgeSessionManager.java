@@ -4,8 +4,14 @@
  */
 package org.wiredwidgets.cow.server.manager;
 
+import javax.persistence.EntityManagerFactory;
+import org.drools.KnowledgeBase;
+import org.drools.KnowledgeBaseFactory;
 import org.drools.SystemEventListener;
 import org.drools.SystemEventListenerFactory;
+import org.drools.persistence.jpa.JPAKnowledgeService;
+import org.drools.runtime.Environment;
+import org.drools.runtime.EnvironmentName;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.jbpm.process.workitem.wsht.GenericCommandBasedWSHumanTaskHandler;
 import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
@@ -21,15 +27,12 @@ import org.jbpm.task.utils.ContentMarshallerContext;
 public class KnowledgeSessionManager {
     StatefulKnowledgeSession kSession;
     MinaHTWorkItemHandler minaWorkItemHandler;
+    KnowledgeBase kBase;
+    EntityManagerFactory emf;
     
     public void init() {
-        //GenericCommandBasedWSHumanTaskHandler test = new GenericCommandBasedWSHumanTaskHandler(kSession);
-        minaWorkItemHandler = new MinaHTWorkItemHandler(kSession);
-        //minaWorkItemHandler.setIpAddress("127.0.0.1");
-        //minaWorkItemHandler.setPort(9123);
-        //minaWorkItemHandler.setMarshallerContext(new ContentMarshallerContext());
-        kSession.getWorkItemManager().registerWorkItemHandler("Human Task", minaWorkItemHandler);
-        //SystemEventListenerFactory.setSystemEventListener(new SystemEventListener());
+        //minaWorkItemHandler = new MinaHTWorkItemHandler(kSession);
+        //kSession.getWorkItemManager().registerWorkItemHandler("Human Task", minaWorkItemHandler);
     }
     
     public StatefulKnowledgeSession getkSession() {
@@ -38,6 +41,22 @@ public class KnowledgeSessionManager {
     
     public void setkSession(StatefulKnowledgeSession kSession) {
         this.kSession = kSession;
+    }
+    
+    public KnowledgeBase getkBase() {
+        return kBase;
+    }
+    
+    public void setkBase(KnowledgeBase kBase) {
+        this.kBase = kBase;
+    }
+    
+    public EntityManagerFactory getemf() {
+        return emf;
+    }
+    
+    public void setemf(EntityManagerFactory emf) {
+        this.emf = emf;
     }
     
     public MinaHTWorkItemHandler getminaWorkItemHandler() {

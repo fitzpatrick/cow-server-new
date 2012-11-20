@@ -4,20 +4,12 @@
  */
 package org.wiredwidgets.cow.server.service;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.Map.Entry;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.jbpm.task.Content;
-import org.jbpm.task.Deadline;
-import org.jbpm.task.Deadlines;
-import org.jbpm.task.I18NText;
-import org.jbpm.task.OrganizationalEntity;
-import org.jbpm.task.PeopleAssignments;
-import org.jbpm.task.TaskData;
+import org.jbpm.task.*;
 import org.jbpm.task.query.TaskSummary;
 import org.jbpm.task.service.ContentData;
 import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
@@ -64,7 +56,11 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasks() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        List<Task> tasks = findAllUnassignedTasks();
+        
+        //List<TaskSummary> jbpmTasks = (List<TaskSummary>)taskClient.query("select new org.jbpm.task.query.TaskSummary(t.id,t.taskData.processInstanceId, name.text,subject.text,description.text,t.taskData.status,t.priority, t.taskData.skipable,t.taskData.actualOwner, t.taskData.createdBy, t.taskData.createdOn, t.taskData.activationTime, t.taskData.expirationTime, t.taskData.processId, t.taskData.processSessionId) from Task t left join t.taskData.createdBy left join t.subjects as subject left join t.descriptions as description left join t.names as name where t.archived=0", Integer.MAX_VALUE, 0);
+        List<TaskSummary> jbpmTasks = (List<TaskSummary>)taskClient.query("select new org.jbpm.task.query.TaskSummary(t.id,t.taskData.processInstanceId,name.text,subject.text,description.text,t.taskData.status,t.priority,t.taskData.skipable,actualOwner,createdBy,t.taskData.createdOn,t.taskData.activationTime,t.taskData.expirationTime,t.taskData.processId,t.taskData.processSessionId) from Task t left join t.taskData.createdBy createdBy left join t.taskData.actualOwner actualOwner left join t.subjects as subject left join t.descriptions as description left join t.names as name, OrganizationalEntity potentialOwners where t.archived = 0 ", Integer.MAX_VALUE,0);
+        return this.convertTasks(jbpmTasks);
     }
 
     @Transactional(readOnly = true)
@@ -106,28 +102,41 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllUnassignedTasks() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        List<Status> status = new ArrayList<Status>();
+        status.add(Status.Created); 
+        status.add(Status.InProgress);
+        status.add(Status.Ready);
+        
+        List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup("Administrator", groups, status, "en-UK");
+        
+        return this.convertTasks(tasks);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Task> findGroupTasks(String user) {
         // Need to add user groups to this
-        List<String> groups = (List<String>) userGroups.get(user);
-        /*
-         * List<Status> status = new ArrayList<Status>();
-         * status.add(Status.Created); status.add(Status.InProgress);
-         * status.add(Status.Ready);
-         */
-        //BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
-        List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwner(user, groups, "en-UK"/*, taskSummaryResponseHandler*/);
-        //List<TaskSummary> tasks = taskSummaryResponseHandler.getResults();
+        List<String> groupsForUser = userGroups.get(user);
+        
+        List<Status> status = new ArrayList<Status>();
+        status.add(Status.Created); 
+        status.add(Status.InProgress);
+        status.add(Status.Ready);
+        
+        List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup(user, groupsForUser, status, "en-UK");
+        
         return this.convertTasks(tasks);
     }
 
     @Override
     public void takeTask(Long taskId, String userId) {
-        taskClient.claim(taskId, userId);
+        List<String> groupsForUser = (List<String>) userGroups.get(userId);
+        taskClient.claim(taskId, userId, groupsForUser);
+    }
+    
+    @Override
+    public void updateTask(Task task) {
+        this.createOrUpdateTask(task);
     }
 
     @Transactional(readOnly = true)
@@ -177,11 +186,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<HistoryTask> getHistoryTasks(String assignee, Date startDate, Date endDate) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public void updateTask(Task task) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -236,7 +240,6 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
      */
     //TODO: Check if you can update a task. Can you update task by just adding a task with the same ID?
     private org.jbpm.task.Task createOrUpdateTask(Task source) {
-        BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
 
         org.jbpm.task.Task target;
         boolean newTask = false;
@@ -244,8 +247,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
             newTask = true;
             target = new org.jbpm.task.Task();
         } else {
-            target = taskClient.getTask(Long.valueOf(source.getId())/*, getTaskResponseHandler*/);
-            //target = getTaskResponseHandler.getTask();
+            target = taskClient.getTask(Long.valueOf(source.getId()));
         }
         if (target == null) {
             return null;
@@ -301,14 +303,9 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
          * this.taskService.setVariables(target.getId(), variables); }
          */
 
-       // BlockingAddTaskResponseHandler addTaskResponseHandler = new BlockingAddTaskResponseHandler();
         if (newTask) {
-            taskClient.addTask(target, null/*, addTaskResponseHandler*/);
+            taskClient.addTask(target, null);
         }
-
-       /* if (addTaskResponseHandler != null) {
-            target.setId(addTaskResponseHandler.getTaskId());
-        }*/
 
         return target;
     }
