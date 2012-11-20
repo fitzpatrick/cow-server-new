@@ -19,10 +19,12 @@
  */
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
-import org.omg.spec.bpmn._20100524.model.*;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.wiredwidgets.cow.server.api.model.v2.Decision;
+import org.wiredwidgets.cow.server.api.model.v2.Loop;
 import org.wiredwidgets.cow.server.api.model.v2.Option;
-import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
 /**
@@ -31,20 +33,25 @@ import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
  */
 public class Bpmn20DecisionUserTaskNodeBuilder extends Bpmn20UserTaskNodeBuilder {
     
-    private Decision decision;
+    private List<Option> options = new ArrayList<Option>();
 
 
     public Bpmn20DecisionUserTaskNodeBuilder(ProcessContext context, Decision decision) {
         super(context, decision.getTask());
-        this.decision = decision;
+        addOptions(decision);
     }
-
+    
+    public Bpmn20DecisionUserTaskNodeBuilder(ProcessContext context, Loop loop) {
+        super(context, loop.getLoopTask());
+        addOptions(loop);
+    }    
+    
     @Override
     protected void buildInternal() {
 
         super.buildInternal();
                    
-        addDataInput("Options", getOptionsString(decision));
+        addDataInput("Options", getOptionsString());
         String decisionVar = getNode().getId() + "_decision";
         addDataOutput(decisionVar, true);
         
@@ -52,19 +59,33 @@ public class Bpmn20DecisionUserTaskNodeBuilder extends Bpmn20UserTaskNodeBuilder
         setBuildProperty("decisionVar", decisionVar);
   
     }
-
-    private String getOptionsString(Decision decision) {
-        String options = null;
-        for (Option option : decision.getOptions()) {
-            if (options == null) {
-                options = option.getName();
-            } else {
-                options += ("," + option.getName());
-            }
-        }
-        return options;
+    
+    private void addOptions(Decision decision) {
+    	for (Option option : decision.getOptions()) {
+    		options.add(option);
+    	}
     }
     
+    private void addOptions(Loop loop) {
+    	Option done = new Option();
+    	done.setName(loop.getDoneName());
+    	Option repeat = new Option();
+    	repeat.setName(loop.getRepeatName());
+    	options.add(done);
+    	options.add(repeat);
+    }
 
+    private String getOptionsString() {
+        String optionString = null;
+        for (Option option : options) {
+            if (optionString == null) {
+                optionString = option.getName();
+            } else {
+                optionString += ("," + option.getName());
+            }
+        }
+        return optionString;
+    }
     
+   
 }

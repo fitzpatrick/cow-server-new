@@ -257,6 +257,7 @@
             <util:set>
                 <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilderFactory" />
                 <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DecisionUserTaskNodeBuilderFactory" />
+                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20LoopDecisionUserTaskNodeBuilderFactory" />
                 <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ServiceTaskNodeBuilderFactory" />
                 <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20SubProcessNodeBuilderFactory" />
                 <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ExitNodeBuilderFactory" />
@@ -270,7 +271,7 @@
                 <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ConvergingComplexGatewayNodeBuilderFactory" />
             </util:set>
         </property>
-    </bean>    
+    </bean>     
  
 <!--     <bean id="testHumanVars" class="org.wiredwidgets.cow.server.test.TestHumanVars" /> -->
 

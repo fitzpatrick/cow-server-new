@@ -23,8 +23,11 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 
@@ -62,13 +65,7 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     
     @Override
     public boolean deleteProcessDefinitionsByKey(String key) {
-//        boolean found = false;
-//        for (org.jbpm.api.ProcessDefinition def : repositoryService.createProcessDefinitionQuery().processDefinitionKey(key).list()) {
-//            found = true;
-//            repositoryService.deleteDeployment(def.getDeploymentId());
-//        }
-//        return found;
-    	throw new UnsupportedOperationException("Not supported yet.");
+    	return deleteProcessDefFromRem2(key);
     }    
 
     @Transactional(readOnly = true)
@@ -120,6 +117,21 @@ public class ProcessDefinitionsServiceImpl extends AbstractCowServiceImpl implem
     		defs.add(pd);
     	}
     	return defs;
+    	
+    }
+    
+    private boolean deleteProcessDefFromRem2(String key) {
+    	String url = REM2_URL + "/cms/workflows/" + key;
+    	
+    	try {
+    		ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
+    	}
+    	catch (HttpClientErrorException e) {
+    		// REM2 returns 404 if the object is not found, which
+    		// triggers this exception in RestTemplate
+    		return false;
+    	}
+    	return true; 
     	
     }
 

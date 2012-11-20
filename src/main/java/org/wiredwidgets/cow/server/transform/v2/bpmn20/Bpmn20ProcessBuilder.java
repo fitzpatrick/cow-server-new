@@ -59,7 +59,7 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
         process.setProcessType(TProcessType.PRIVATE);
         process.setIsExecutable(Boolean.TRUE);
         process.getOtherAttributes().put(new QName("http://www.jboss.org/drools","packageName","tns"), "defaultPackage");
-        process.setId("com.sample.evaluation");
+        process.setId(source.getKey());
         process.setName(source.getName());
         
         definitions.getRootElements().add(factory.createProcess(process));

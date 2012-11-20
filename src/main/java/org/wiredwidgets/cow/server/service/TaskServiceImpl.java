@@ -8,7 +8,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import javax.xml.datatype.XMLGregorianCalendar;
-
+import org.apache.log4j.Logger;
 import org.jbpm.task.*;
 import org.jbpm.task.query.TaskSummary;
 import org.jbpm.task.service.ContentData;
