@@ -39,7 +39,7 @@ import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 public class ProcessesController extends CowServerController {
 
     @Autowired
-    ProcessService processService;
+    ProcessService service;
     
     private static Logger log = Logger.getLogger(ProcessesController.class);
 
@@ -64,7 +64,7 @@ public class ProcessesController extends CowServerController {
     @RequestMapping(value = "/{key}", params = "format=bpmn20")
     @ResponseBody
     public Definitions getBpmn20Process(@PathVariable("key") String key) {
-    	return processService.getBpmn20Process(key);
+    	return service.getBpmn20Process(key);
     }    
     
     /**
@@ -89,6 +89,6 @@ public class ProcessesController extends CowServerController {
     @RequestMapping(value = "/{key}", params = "format=v2")
     @ResponseBody
     public StreamSource getV2Process(@PathVariable("key") String key) {  
-        return new StreamSource(processService.getResourceAsStream(decode(key), ProcessService.V2_EXTENSION));
+        return new StreamSource(service.getResourceAsStream(decode(key), ProcessService.V2_EXTENSION));
     }
 }
