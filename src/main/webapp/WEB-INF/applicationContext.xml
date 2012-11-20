@@ -211,14 +211,19 @@
     <bean id="jacksonMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
         <property name="objectMapper" ref="jacksonObjectMapper" />
     </bean>
-    
-    
    
     <!-- Special instance of the stringMessageConverter that reads and writes application/xml content -->
     <!-- this allows it to handle XML content stored in a String object -->
     <bean id="xmlStringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter" >
         <property name="supportedMediaTypes" value="application/xml" />
     </bean>
+    
+    <!-- Custom Service classes -->
+    <!--<bean id="service" class="org.wiredwidgets.cow.server.service.ProcessServiceImpl" />
+    <bean id="processInstanceService" class="org.wiredwidgets.cow.server.service.ProcessInstanceServiceImpl" />
+    <bean id="processDefinitionsService" class="org.wiredwidgets.cow.server.service.ProcessDefinitionsServiceImpl" />
+    <bean id="taskService" class="org.wiredwidgets.cow.server.service.TaskServiceImpl" />-->
+    <bean id="usersService" class="org.wiredwidgets.cow.server.service.UsersServiceImpl" />
     
     <!-- Instance of RestTemplate, used by RestServiceInvoker -->
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" >
