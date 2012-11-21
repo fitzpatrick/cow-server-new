@@ -194,7 +194,7 @@ public class ProcessInstancesController extends CowServerController{
         List<HistoryActivity> activities = taskService.getHistoryActivities(decode(id) + '.' + ext);
         ha.getHistoryActivities().addAll(activities);
         return ha;*/
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -210,7 +210,7 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public org.wiredwidgets.cow.server.api.model.v2.Process getProcessInstanceStatus(@PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
         //return processInstanceService.getProcessInstanceStatus(decode(id) + "." + ext);
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -229,7 +229,7 @@ public class ProcessInstancesController extends CowServerController{
         } else {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }*/
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -248,7 +248,7 @@ public class ProcessInstancesController extends CowServerController{
         pi.setProcessDefinitionKey(execute);
         pi.setName(name);
         startExecution(pi, false, response, req);*/
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -265,7 +265,7 @@ public class ProcessInstancesController extends CowServerController{
         /*ProcessInstances pi = new ProcessInstances();
         pi.getProcessInstances().addAll(processInstanceService.findHistoryProcessInstances(key, endedAfter, ended));
         return pi;*/
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }  
     
     /**
@@ -280,7 +280,7 @@ public class ProcessInstancesController extends CowServerController{
     public ProcessInstances getProcessInstancesWithTasks() {
         
         //return createProcessInstances(mergeTasks(taskService.findAllTasks()));
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -294,7 +294,7 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForAssignee(@RequestParam("assignee") String assignee) {
         //return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -307,7 +307,7 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public ProcessInstances getProcessInstancesWithUnassignedTasks() {
         //return createProcessInstances(mergeTasks(taskService.findAllUnassignedTasks()));
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -320,6 +320,6 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForCandidate(@RequestParam("candidate") String candidate) {
         //return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }  
 }

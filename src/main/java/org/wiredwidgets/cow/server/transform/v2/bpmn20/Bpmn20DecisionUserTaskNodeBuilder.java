@@ -55,6 +55,9 @@ public class Bpmn20DecisionUserTaskNodeBuilder extends Bpmn20UserTaskNodeBuilder
         String decisionVar = getNode().getId() + "_decision";
         addDataOutput(decisionVar, true);
         
+        // We need to be able to know the name of the decision variable
+        addDataInput("DecisionVarName", decisionVar);
+        
         // this is picked up in GatewayDecisionActivityBuilder
         setBuildProperty("decisionVar", decisionVar);
   

@@ -127,27 +127,27 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Override
     public boolean updateProcessInstance(ProcessInstance instance) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Process getProcessInstanceStatus(String processInstanceId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<ProcessInstance> findAllHistoryProcessInstances() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<ProcessInstance> findHistoryProcessInstances(String key, Date endedAfter, boolean ended) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Process getV2Process(String processInstanceId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private List<ProcessInstance> convertProcessInstances(List<org.drools.runtime.process.ProcessInstance> source) {

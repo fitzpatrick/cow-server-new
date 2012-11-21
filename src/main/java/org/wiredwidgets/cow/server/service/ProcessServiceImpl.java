@@ -58,7 +58,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     @Transactional(readOnly = true)
     @Override
     public StreamSource getResource(String id, String name) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -83,13 +83,13 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     @Transactional(readOnly = true)
     @Override
     public ResourceNames getResourceNames(String deploymentId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public InputStream getNativeProcessAsStream(String key) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
@@ -150,7 +150,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     @Transactional(readOnly = true)
     @Override
     public InputStream getResourceAsStreamByDeploymentId(String id, String extension) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)

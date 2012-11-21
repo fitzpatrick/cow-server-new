@@ -26,17 +26,17 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
     
     @Override
     public String createGroup(String groupName) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return "Not supported yet.";
     }
 
     @Override
     public void createOrUpdateUser(User user) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public boolean deleteUser(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
@@ -67,18 +67,18 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
     @Transactional(readOnly = true)
     @Override
     public Group findGroup(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public User findUser(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public boolean deleteGroup(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return false;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }
