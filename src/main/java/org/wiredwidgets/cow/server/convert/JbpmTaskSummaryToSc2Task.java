@@ -74,17 +74,21 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
         Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
         		"org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", 
         		content.getContent(), 
-        		minaWorkItemHandler.getMarshallerContext(), null);     
-        String[] options = ( (String) map.get("Options") ).split(",");
-        target.getOutcomes().addAll(Arrays.asList(options));
+        		minaWorkItemHandler.getMarshallerContext(), null); 
+        
+        if (map.containsKey("Options")){
+            String[] options = ( (String) map.get("Options") ).split(",");
+            target.getOutcomes().addAll(Arrays.asList(options));
+        }
         
         // get ad-hoc variables from the "Content" map
-       
-        Map<String, Object> contentMap = (Map<String, Object>) map.get("Content");
-        if (contentMap != null) {
-	        for (Entry<String, Object> entry : contentMap.entrySet()) {
-	        	addVariable(target, entry.getKey(), entry.getValue());
-	        }
+        if (map.containsKey("Content")){
+            Map<String, Object> contentMap = (Map<String, Object>) map.get("Content");
+            if (contentMap != null) {
+                    for (Map.Entry<String, Object> entry : contentMap.entrySet()) {
+                            addVariable(target, entry.getKey(), entry.getValue());
+                    }
+            }
         }
 
         // add variables
