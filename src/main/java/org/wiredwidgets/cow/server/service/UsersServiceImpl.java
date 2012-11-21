@@ -67,13 +67,13 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
     @Transactional(readOnly = true)
     @Override
     public Group findGroup(String id) {
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new Group();//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public User findUser(String id) {
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new User();//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
