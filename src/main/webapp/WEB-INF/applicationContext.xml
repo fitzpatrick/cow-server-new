@@ -75,6 +75,7 @@
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessDefinition" />-->
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2Task" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmTaskSummaryToSc2Task" />
+                <bean class="org.wiredwidgets.cow.server.convert.JbpmTaskToSc2Task" />
                 <!--<bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2User" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2Group" />
                 <bean class="org.wiredwidgets.cow.server.convert.Sc2ToJbpmTask" />-->

@@ -93,12 +93,18 @@ public class TasksController {
     @RequestMapping("/active/{id}")
     @ResponseBody
     public Task getTask(@PathVariable("id") String id, HttpServletResponse response) {
-        Task task = taskService.getTask(Long.valueOf(id));
+        try{    
+        Task task = null;
+        task = taskService.getTask(Long.valueOf(id));
         if (task == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             return null;
         } else {
             return task;
+        }
+        }catch(Exception e){
+            log.error(e);
+            return null;
         }
     }
 
@@ -212,9 +218,14 @@ public class TasksController {
     @RequestMapping("/active")
     @ResponseBody
     public Tasks getAllTasks() {
+        try{
         Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findAllTasks()); 
         return tasks;
+        }catch(Exception e){
+            log.error(e);
+            return null;
+        }
     }
 
     /**
@@ -226,9 +237,14 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "assignee")
     @ResponseBody
     public Tasks getTasksByAssignee(@RequestParam("assignee") String assignee) {
+        try{
         Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findPersonalTasks(assignee));
         return tasks;
+        }catch(Exception e){
+            log.error(e);
+            return null;
+        }
     }
 
     /**
@@ -247,7 +263,7 @@ public class TasksController {
          * taskService); response.setContentType("application/xml;
          * charset=UTF-8"); return feed;
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        return "Not supported yet.";
     }
 
     /**
@@ -258,10 +274,14 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "unassigned=true")
     @ResponseBody
     public Tasks getUnassignedTasks() {
-
+        try{
         Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
         return tasks;
+        }catch(Exception e){
+            log.error(e);
+            return null;
+        }
 
         //throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -279,9 +299,14 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "candidate")
     @ResponseBody
     public Tasks getUnassignedTasksByCandidate(@RequestParam("candidate") String candidate) {
+        try{
         Tasks tasks = new Tasks();
         tasks.getTasks().addAll(taskService.findGroupTasks(candidate));
         return tasks;
+        }catch(Exception e){
+            log.error(e);
+            return null;
+        }
     }
 
     /**
@@ -298,7 +323,7 @@ public class TasksController {
          * tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(processInstance));
          * return tasks;
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -315,7 +340,7 @@ public class TasksController {
          * tasks.getTasks().addAll(taskService.findAllTasksByProcessKey(processKey));
          * return tasks;
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -335,7 +360,7 @@ public class TasksController {
          * { response.setStatus(HttpServletResponse.SC_NOT_FOUND); return null;
          * } else { return task; }
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     /**
@@ -362,7 +387,7 @@ public class TasksController {
          * tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(assignee,
          * start, end)); return tasks;
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @RequestMapping(value = "/history", method = RequestMethod.GET, params = "process")
@@ -373,7 +398,7 @@ public class TasksController {
          * tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(process));
          * return tasks;
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
 
@@ -391,7 +416,7 @@ public class TasksController {
          * p.getParticipations().addAll(this.taskService.getTaskParticipations(id));
          * return p;
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, params = "group")
@@ -400,7 +425,7 @@ public class TasksController {
          * this.taskService.addTaskParticipatingGroup(taskId, group, type);
          * response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, params = "group")
@@ -409,7 +434,7 @@ public class TasksController {
          * this.taskService.removeTaskParticipatingGroup(taskId, group, type);
          * response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, params = "user")
@@ -418,7 +443,7 @@ public class TasksController {
          * this.taskService.addTaskParticipatingUser(taskId, user, type);
          * response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, params = "user")
@@ -427,7 +452,7 @@ public class TasksController {
          * this.taskService.removeTaskParticipatingUser(taskId, user, type);
          * response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @RequestMapping(value = "/orphaned")
@@ -438,6 +463,6 @@ public class TasksController {
          * tasks.getTasks().addAll(taskService.findOrphanedTasks()); return
          * tasks;
          */
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 }

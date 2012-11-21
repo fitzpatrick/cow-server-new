@@ -36,7 +36,8 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 
     //private static TypeDescriptor JBPM_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.task.Participation.class));
     private static TypeDescriptor COW_PARTICIPATION_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Participation.class));
-    private static TypeDescriptor JBPM_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.task.query.TaskSummary.class));
+    private static TypeDescriptor JBPM_TASK_SUMMARY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.task.query.TaskSummary.class));
+    private static TypeDescriptor JBPM_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.task.Task.class));
     private static TypeDescriptor COW_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Task.class));
     //private static TypeDescriptor JBPM_HISTORY_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryTask.class));
     private static TypeDescriptor COW_HISTORY_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(HistoryTask.class));
@@ -46,8 +47,22 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findPersonalTasks(String assignee) {
-        List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwner(assignee, "en-UK");
-        return this.convertTasks(tasks);
+        List<TaskSummary> tempTasks = new ArrayList<TaskSummary>();
+        List<TaskSummary> tasks = new ArrayList<TaskSummary>();
+        List<String> groupsForUser = userGroups.get(assignee);
+        
+        List<Status> status = new ArrayList<Status>();
+        status.add(Status.Reserved);
+        tempTasks.addAll(taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup(assignee, groupsForUser, status, "en-UK"));
+        
+        for (TaskSummary task : tempTasks){
+            User u = task.getActualOwner();
+            if (u.getId().equals(assignee)){
+                tasks.add(task);
+            }
+        }
+        
+        return this.convertTaskSummarys(tasks);
     }
 
     @Override
@@ -59,11 +74,8 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasks() {
-        List<Task> tasks = findAllUnassignedTasks();
-        
-        //List<TaskSummary> jbpmTasks = (List<TaskSummary>)taskClient.query("select new org.jbpm.task.query.TaskSummary(t.id,t.taskData.processInstanceId, name.text,subject.text,description.text,t.taskData.status,t.priority, t.taskData.skipable,t.taskData.actualOwner, t.taskData.createdBy, t.taskData.createdOn, t.taskData.activationTime, t.taskData.expirationTime, t.taskData.processId, t.taskData.processSessionId) from Task t left join t.taskData.createdBy left join t.subjects as subject left join t.descriptions as description left join t.names as name where t.archived=0", Integer.MAX_VALUE, 0);
-        List<TaskSummary> jbpmTasks = (List<TaskSummary>)taskClient.query("select new org.jbpm.task.query.TaskSummary(t.id,t.taskData.processInstanceId,name.text,subject.text,description.text,t.taskData.status,t.priority,t.taskData.skipable,actualOwner,createdBy,t.taskData.createdOn,t.taskData.activationTime,t.taskData.expirationTime,t.taskData.processId,t.taskData.processSessionId) from Task t left join t.taskData.createdBy createdBy left join t.taskData.actualOwner actualOwner left join t.subjects as subject left join t.descriptions as description left join t.names as name, OrganizationalEntity potentialOwners where t.archived = 0 ", Integer.MAX_VALUE,0);
-        return this.convertTasks(jbpmTasks);
+        List<org.jbpm.task.Task> tasks = (List<org.jbpm.task.Task>)taskClient.query("select t from Task t where t.taskData.status in ('Created', 'Ready', 'Reserved', 'InProgress')", Integer.MAX_VALUE,0);
+        return this.convertTasks(tasks);
     }
 
     @Transactional(readOnly = true)
@@ -76,7 +88,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public HistoryTask getHistoryTask(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -132,7 +144,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         
         List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup("Administrator", groups, status, "en-UK");
         
-        return this.convertTasks(tasks);
+        return this.convertTaskSummarys(tasks);
     }
 
     @Transactional(readOnly = true)
@@ -148,7 +160,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         
         List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup(user, groupsForUser, status, "en-UK");
         
-        return this.convertTasks(tasks);
+        return this.convertTaskSummarys(tasks);
     }
 
     @Override
@@ -166,74 +178,74 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Override
     public List<Task> findAllTasksByProcessInstance(Long id) {
 
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasksByProcessKey(Long id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void addTaskParticipatingGroup(Long taskId, String groupId, String type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void addTaskParticipatingUser(Long taskId, String userId, String type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<Participation> getTaskParticipations(Long taskId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void removeTaskParticipatingGroup(Long taskId, String groupId, String type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void removeTaskParticipatingUser(Long taskId, String userId, String type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public void removeTaskAssignment(Long taskId) {
 
-        throw new UnsupportedOperationException("Not supported yet.");
+        //throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<HistoryTask> getHistoryTasks(String assignee, Date startDate, Date endDate) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<HistoryTask> getHistoryTasks(String processId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<HistoryActivity> getHistoryActivities(String processInstanceId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Task> findOrphanedTasks() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Transactional(readOnly = true)
     @Override
     public Activity getWorkflowActivity(String processInstanceId, String key) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private Date convert(XMLGregorianCalendar source) {
@@ -246,7 +258,11 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
      * return (List<Participation>) converter.convert(source,
      * JBPM_PARTICIPATION_LIST, COW_PARTICIPATION_LIST); }
      */
-    private List<Task> convertTasks(List<org.jbpm.task.query.TaskSummary> source) {
+    private List<Task> convertTaskSummarys(List<org.jbpm.task.query.TaskSummary> source) {
+        return (List<Task>) converter.convert(source, JBPM_TASK_SUMMARY_LIST, COW_TASK_LIST);
+    }
+    
+    private List<Task> convertTasks(List<org.jbpm.task.Task> source) {
         return (List<Task>) converter.convert(source, JBPM_TASK_LIST, COW_TASK_LIST);
     }
 
