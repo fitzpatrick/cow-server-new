@@ -4,15 +4,27 @@
  */
 package org.wiredwidgets.cow.server.service;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.log4j.Logger;
-import org.jbpm.task.*;
+import org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy;
+import org.jbpm.task.Content;
+import org.jbpm.task.Deadline;
+import org.jbpm.task.Deadlines;
+import org.jbpm.task.I18NText;
+import org.jbpm.task.OrganizationalEntity;
+import org.jbpm.task.PeopleAssignments;
+import org.jbpm.task.Status;
+import org.jbpm.task.TaskData;
+import org.jbpm.task.User;
 import org.jbpm.task.query.TaskSummary;
 import org.jbpm.task.service.ContentData;
-import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
 import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -22,7 +34,8 @@ import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.Participation;
 import org.wiredwidgets.cow.server.api.service.Task;
-import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder.*;
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DecisionUserTaskNodeBuilder.DECISION_VAR_NAME;
 
 /**
  *
@@ -96,41 +109,43 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         log.debug(assignee + " starting task with ID: " + id);
         
         taskClient.start(id, assignee);
-        
         org.jbpm.task.Task task = taskClient.getTask(id);
+        Content inputContent = taskClient.getContent(task.getTaskData().getDocumentContentId());        
+        Map<String, Object> inputMap = (Map<String, Object>) ContentMarshallerHelper.unmarshall(SerializablePlaceholderResolverStrategy.class.getName(), inputContent.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
         
-        Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());
-        
-        Object result = ContentMarshallerHelper.unmarshall("org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", content.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
-        Map<String, Object> map = (Map<String, Object>)result;
-        
-        for (Map.Entry<String, Object> entry : map.entrySet()){
+        for (Map.Entry<String, Object> entry : inputMap.entrySet()){
             log.debug(entry.getKey() + " = " + entry.getValue());
         }
         
-        //Map<String, Object> contentObj = (Map<String, Object>)map.get("content");
-       // contentObj.put("testvar", "winning");
-        //results.put("content", contentObj);
+        Map<String, Object> outputMap = new HashMap<String, Object>();
         
-        // put Outcome into the map as "Decision"
-        if (map.get("DecisionVarName") != null) {
-        	map.put((String)map.get("DecisionVarName"), outcome);
+        // put Outcome into the outputMap 
+        // The InputMap contains a variable that tells us what key to use
+        if (inputMap.get(DECISION_VAR_NAME) != null) {
+        	outputMap.put((String)inputMap.get(DECISION_VAR_NAME), outcome);
+        }        
+               
+        Map<String, Object> outputVarsMap = new HashMap<String, Object>();       
+        Map<String, Object> inputVarsMap = (Map<String, Object>) inputMap.get(TASK_INPUT_VARIABLES_NAME);
+        
+        if (inputVarsMap != null) {
+        	// initialize the output map with the input values
+        	log.debug("Copying input map: " + inputVarsMap);
+        	outputVarsMap.putAll(inputVarsMap);
         }
-                         
+                   
         if (variables != null && variables.size() > 0) {
-        	Map<String, Object> contentMap = (Map<String, Object>) (map.get(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME));
-        	if (contentMap == null) {
-        		log.debug("Initializing content map");
-        		contentMap = new HashMap<String, Object>();
-        		map.put(Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME, contentMap);
-        	}       
-        	// other variables
         	log.debug("Adding variables: " + variables);
-        	contentMap.putAll(variables);
+        	// update with any new or modified values
+        	outputVarsMap.putAll(variables);
     	}
         
-        ContentData contentData = ContentMarshallerHelper.marshal(result, minaWorkItemHandler.getMarshallerContext(), null);
+        if (outputVarsMap.size() > 0) {
+        	log.debug("Adding map to output");
+        	outputMap.put(TASK_OUTPUT_VARIABLES_NAME, outputVarsMap);   
+        }
         
+        ContentData contentData = ContentMarshallerHelper.marshal(outputMap, minaWorkItemHandler.getMarshallerContext(), null);      
         taskClient.complete(id, assignee, contentData);
     }
 

@@ -35,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.wiredwidgets.cow.server.api.service.HistoryActivities;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessInstances;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
@@ -71,14 +72,16 @@ public class ProcessInstancesController extends CowServerController{
      * @param req 
      */
     @RequestMapping(value = "/active", method = RequestMethod.POST, params = "!execute")
-    public void startExecution(@RequestBody org.wiredwidgets.cow.server.api.service.ProcessInstance pi, @RequestParam(value = "init-vars", required = false) boolean initVars, HttpServletResponse response, HttpServletRequest req) {
+    public void startExecution(@RequestBody ProcessInstance pi, @RequestParam(value = "init-vars", required = false) boolean initVars, HttpServletResponse response, HttpServletRequest req) {
         log.debug("startExecution: " + pi.getProcessDefinitionKey());
         
         // option to initialize the process instance with variables / values set in the master process
         if (initVars) {
-            org.wiredwidgets.cow.server.api.model.v2.Process process = processService.getV2Process(pi.getProcessDefinitionKey());
-            for (org.wiredwidgets.cow.server.api.model.v2.Variable var : process.getVariables().getVariables()) {
-                addVariable(pi, var.getName(), var.getValue());
+            Process process = processService.getV2Process(pi.getProcessDefinitionKey());
+            if (process.getVariables() != null) {
+	            for (org.wiredwidgets.cow.server.api.model.v2.Variable var : process.getVariables().getVariables()) {
+	                addVariable(pi, var.getName(), var.getValue());
+	            }
             }
         }
         
@@ -133,7 +136,7 @@ public class ProcessInstancesController extends CowServerController{
             return pi;
         } else {
             //org.wiredwidgets.cow.server.api.service.ProcessInstance instance = processInstanceService.getProcessInstance(id + '.' + ext);
-            org.wiredwidgets.cow.server.api.service.ProcessInstance instance = processInstanceService.getProcessInstance(ext);
+            ProcessInstance instance = processInstanceService.getProcessInstance(ext);
             if (instance == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND); // 404
             }
