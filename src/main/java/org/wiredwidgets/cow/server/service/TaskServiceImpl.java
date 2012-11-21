@@ -45,7 +45,13 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findPersonalTasks(String assignee) {
-        List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwner(assignee, "en-UK");
+        List<TaskSummary> tasks = new ArrayList<TaskSummary>();
+        List<String> groupsForUser = userGroups.get(assignee);
+        
+        List<Status> status = new ArrayList<Status>();
+        status.add(Status.Reserved);
+        tasks.addAll(taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup(assignee, groupsForUser, status, "en-UK"));
+        
         return this.convertTasks(tasks);
     }
 

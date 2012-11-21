@@ -5,6 +5,7 @@
 package org.wiredwidgets.cow.server.manager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import org.jbpm.task.Group;
@@ -70,7 +71,7 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
 
         for (String username : getDefaultUsers()) {
             jbpmTaskServiceSession.addUser(new User(username));
-            if (username != "Administrator") {
+            /*if (username != "Administrator") {
 
                 List<String> groupsForUser = getUserGroups(username);
                 for (String group : groupsForUser) {
@@ -82,14 +83,31 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
                         userGroups.put(username, values);
                     }
                 }
-            }
+            }*/
         }
+        
+        constructUserGroups();
     }
 
-    private String[] getDefaultUsers() {
-        return new String[]{"shawn", "lew", "Administrator"};
+    private List<String> getDefaultUsers() {
+        List<String> allUsers = new ArrayList<String>();
+        allUsers.add("Administrator");
+        allUsers.add("shawn");
+        allUsers.add("lew");
+        allUsers.add("jon");
+        allUsers.add("matt");
+        allUsers.add("prema");
+        return allUsers;
     }
 
+    private void constructUserGroups(){
+        userGroups.put("shawn", getAllGroups());
+        userGroups.put("lew", Arrays.asList("SIDO","DOC","DAC"));
+        userGroups.put("jon", Arrays.asList("DT","COA"));
+        userGroups.put("matt", Arrays.asList("SIDO","COA"));
+        userGroups.put("prema", Arrays.asList("DT","DOC","DAC"));
+    }
+    
     private List<String> getUserGroups(String username) {
         if (!username.equals("Administrator")) {
             List<String> groupsForUser = new ArrayList<String>();
@@ -107,6 +125,12 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
     private List<String> getAllGroups() {
         List<String> allGroups = new ArrayList<String>();
         allGroups.add("group1");
+        allGroups.add("SIDO");
+        allGroups.add("DT");
+        allGroups.add("DOC");
+        allGroups.add("DAC");
+        allGroups.add("COA");
+        
         /*
          * groups.add("group2");
         groups.add("admin");
