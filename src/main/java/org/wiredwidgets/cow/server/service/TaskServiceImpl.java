@@ -22,6 +22,7 @@ import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.Participation;
 import org.wiredwidgets.cow.server.api.service.Task;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
 
 /**
  *
@@ -79,7 +80,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     }
 
     @Override
-    public void completeTask(Long id, String assignee, String outcome, Map<String, Object> results) {
+    public void completeTask(Long id, String assignee, String outcome, Map<String, Object> variables) {
         log.debug(assignee + " starting task with ID: " + id);
         
         taskClient.start(id, assignee);
@@ -103,19 +104,20 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         if (map.get("DecisionVarName") != null) {
         	map.put((String)map.get("DecisionVarName"), outcome);
         }
-            
-        
-        
-        if (results != null && results.size() > 0) {
-        	Map<String, Object> contentMap = (Map<String, Object>) (map.get("Content"));
+                         
+        if (variables != null && variables.size() > 0) {
+        	Map<String, Object> contentMap = (Map<String, Object>) (map.get(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME));
         	if (contentMap == null) {
+        		log.debug("Initializing content map");
         		contentMap = new HashMap<String, Object>();
+        		map.put(Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME, contentMap);
         	}       
         	// other variables
-        	contentMap.putAll(results);
+        	log.debug("Adding variables: " + variables);
+        	contentMap.putAll(variables);
     	}
         
-        ContentData contentData = ContentMarshallerHelper.marshal(results, minaWorkItemHandler.getMarshallerContext(), null);
+        ContentData contentData = ContentMarshallerHelper.marshal(result, minaWorkItemHandler.getMarshallerContext(), null);
         
         taskClient.complete(id, assignee, contentData);
     }

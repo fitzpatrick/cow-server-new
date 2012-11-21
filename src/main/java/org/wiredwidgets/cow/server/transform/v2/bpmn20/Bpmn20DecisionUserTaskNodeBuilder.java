@@ -53,7 +53,7 @@ public class Bpmn20DecisionUserTaskNodeBuilder extends Bpmn20UserTaskNodeBuilder
                    
         addDataInput("Options", getOptionsString());
         String decisionVar = getNode().getId() + "_decision";
-        addDataOutput(decisionVar, true);
+        addDataOutput(decisionVar, decisionVar);
         
         // We need to be able to know the name of the decision variable
         addDataInput("DecisionVarName", decisionVar);

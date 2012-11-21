@@ -20,7 +20,22 @@
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
 import javax.xml.bind.JAXBElement;
-import org.omg.spec.bpmn._20100524.model.*;
+import javax.xml.namespace.QName;
+
+import org.omg.spec.bpmn._20100524.model.Assignment;
+import org.omg.spec.bpmn._20100524.model.DataInput;
+import org.omg.spec.bpmn._20100524.model.DataInputAssociation;
+import org.omg.spec.bpmn._20100524.model.DataOutput;
+import org.omg.spec.bpmn._20100524.model.DataOutputAssociation;
+import org.omg.spec.bpmn._20100524.model.InputSet;
+import org.omg.spec.bpmn._20100524.model.IoSpecification;
+import org.omg.spec.bpmn._20100524.model.OutputSet;
+import org.omg.spec.bpmn._20100524.model.Property;
+import org.omg.spec.bpmn._20100524.model.ResourceAssignmentExpression;
+import org.omg.spec.bpmn._20100524.model.TDataAssociation;
+import org.omg.spec.bpmn._20100524.model.TFormalExpression;
+import org.omg.spec.bpmn._20100524.model.TPotentialOwner;
+import org.omg.spec.bpmn._20100524.model.TUserTask;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
@@ -29,6 +44,9 @@ import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
  * @author JKRANES
  */
 public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, Task> {
+	
+	public static String TASK_INPUT_VARIABLES_NAME = "Variables";
+	public static String TASK_OUTPUT_VARIABLES_NAME = "Variables";
     
     private IoSpecification ioSpec = new IoSpecification();
     private InputSet inputSet = new InputSet();
@@ -54,8 +72,11 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         ioSpec.getOutputSets().add(outputSet);
         
         // standard JBPM inputs
-        addDataInput("Content");
-        addDataOutput("Content", false);
+        Property varsProperty = getContext().getProcessVariable(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
+        Property processNameProperty = getContext().getProcessVariable(Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY);
+        addDataInput(TASK_INPUT_VARIABLES_NAME, varsProperty);
+        addDataOutput(TASK_OUTPUT_VARIABLES_NAME, varsProperty);
+        addDataInput("ProcessInstanceName", processNameProperty);
         addDataInput("Comment", source.getDescription());
         addDataInput("Skippable", "false");
         addDataInput("TaskName", source.getName());
@@ -66,7 +87,6 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         
         // handle assignment
         addPotentialOwner(t, source.getAssignee());
-        
 
     }
 
@@ -98,6 +118,10 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
     protected void addDataInput(String name, String value) {     
         assignInputValue(addDataInput(name), value);
     }
+    
+    protected void addDataInput(String name,  Property value) {
+    	assignInputValue(addDataInput(name), value);
+    }
        
     protected DataInput addDataInput(String name) {
         DataInput dataInput = new DataInput();
@@ -108,8 +132,17 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         return dataInput;
     }
     
-
-    protected DataOutput addDataOutput(String name, boolean addProcessVar) {
+    /**
+     * Create a new DataOutput linked to a new process level variable
+     * @param name
+     * @param addProcessVar true 
+     * @return
+     */
+    protected DataOutput addDataOutput(String name, String processVarName) {	
+    	return addDataOutput(name, getContext().addProcessVariable(processVarName, "String"));
+    } 
+    
+    protected DataOutput addDataOutput(String name, Property prop) {
         DataOutput dataOutput = new DataOutput();
         String id = getNode().getId() + "_" + name + "Output"; // JBPM naming convention
         dataOutput.setId(id);
@@ -123,21 +156,13 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         // This part is not at all obvious. Determined correct approach by unmarshalling sample BPMN2 into XML
         // and then examining the java objects
         
-        // JAXBElement<Object> ref = new JAXBElement<Object>(SOURCE_REF_QNAME, Object.class, TDataAssociation.class, dataOutput);  
         doa.getSourceReves().add(factory.createTDataAssociationSourceRef(dataOutput));
-        
-        Property prop;
-        if (addProcessVar) {
-            prop = getContext().addProcessVariable(name, "String");
-        }
-        else {
-            prop = new Property();
-            prop.setId(name);
-        }
         doa.setTargetRef(prop);
   
-        return dataOutput;
-    }    
+        return dataOutput;    	
+    }
+    
+    
     
     /**
      * Follows JBPM naming conventions
@@ -160,5 +185,15 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         assignment.setTo(tfeTo);
         
         dia.getAssignments().add(assignment); 
-    }    
+    }   
+    
+    
+    protected void assignInputValue(DataInput dataInput, Property prop) {
+        DataInputAssociation dia = new DataInputAssociation();
+        getNode().getDataInputAssociations().add(dia);
+        dia.setTargetRef(dataInput);     
+        JAXBElement<Object> ref = factory.createTDataAssociationSourceRef(prop);
+        dia.getSourceReves().add(ref);
+    }     
+    
 }

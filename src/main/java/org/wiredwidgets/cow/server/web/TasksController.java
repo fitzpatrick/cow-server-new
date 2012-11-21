@@ -140,6 +140,7 @@ public class TasksController {
                     // Only split on the first ":" found; the value section may contain additional ":" tokens.
                     String[] split = variable.split(":", 2);
                     varMap.put(split[0], split[1]);
+                    log.debug(split[0] + "=" + split[1]);
                 }
             }
             log.debug("Completing task: id=" + id + " outcome=" + outcome);

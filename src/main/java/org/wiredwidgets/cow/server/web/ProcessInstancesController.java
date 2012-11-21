@@ -17,20 +17,29 @@
 package org.wiredwidgets.cow.server.web;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.wiredwidgets.cow.server.api.service.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.wiredwidgets.cow.server.api.service.HistoryActivities;
+import org.wiredwidgets.cow.server.api.service.ProcessInstance;
+import org.wiredwidgets.cow.server.api.service.ProcessInstances;
+import org.wiredwidgets.cow.server.api.service.Variable;
+import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
+import org.wiredwidgets.cow.server.service.ProcessService;
 
 
 /**
@@ -42,8 +51,8 @@ import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 public class ProcessInstancesController extends CowServerController{
     private static Logger log = Logger.getLogger(ProcessInstancesController.class);
     
-    //@Autowired
-    //ProcessService processService;
+    @Autowired
+    ProcessService processService;
     @Autowired
     ProcessInstanceService processInstanceService;
     @Autowired
@@ -66,12 +75,12 @@ public class ProcessInstancesController extends CowServerController{
         log.debug("startExecution: " + pi.getProcessDefinitionKey());
         
         // option to initialize the process instance with variables / values set in the master process
-        /*if (initVars) {
+        if (initVars) {
             org.wiredwidgets.cow.server.api.model.v2.Process process = processService.getV2Process(pi.getProcessDefinitionKey());
             for (org.wiredwidgets.cow.server.api.model.v2.Variable var : process.getVariables().getVariables()) {
                 addVariable(pi, var.getName(), var.getValue());
             }
-        }*/
+        }
         
         String id = processInstanceService.executeProcess(pi);
         
