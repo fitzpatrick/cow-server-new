@@ -16,10 +16,7 @@
 
 package org.wiredwidgets.cow.server.web;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +28,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.wiredwidgets.cow.server.api.service.*;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
+import org.wiredwidgets.cow.server.service.TaskService;
 
 
 /**
@@ -48,6 +46,8 @@ public class ProcessInstancesController extends CowServerController{
     ProcessInstanceService processInstanceService;
     @Autowired
     StatefulKnowledgeSession kSession;
+    @Autowired
+    TaskService taskService;
     /**
      * Starts execution of a new process instance.  The processInstance representation
      * must contain, at minimum, a processDefinitionKey element to identify the process,
@@ -124,7 +124,7 @@ public class ProcessInstancesController extends CowServerController{
             return pi;
         } else {
             //org.wiredwidgets.cow.server.api.service.ProcessInstance instance = processInstanceService.getProcessInstance(id + '.' + ext);
-            org.wiredwidgets.cow.server.api.service.ProcessInstance instance = processInstanceService.getProcessInstance(ext);
+            org.wiredwidgets.cow.server.api.service.ProcessInstance instance = processInstanceService.getProcessInstance(decode(id),Long.decode(ext));
             if (instance == null) {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND); // 404
             }
@@ -293,8 +293,8 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping(value = "/tasks", params = "assignee")
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForAssignee(@RequestParam("assignee") String assignee) {
-        //return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
+        //return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -319,7 +319,28 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping(value = "/tasks", params = "candidate")
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForCandidate(@RequestParam("candidate") String candidate) {
-        //return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return createProcessInstances(mergeTasks(taskService.findGroupTasks(candidate)));
     }  
+    
+    private List<ProcessInstance> mergeTasks(List<Task> tasks) {
+        List<ProcessInstance> instances = processInstanceService.findAllProcessInstances();
+        Map<String, List<Task>> taskMap = new HashMap<String, List<Task> >();
+        List<ProcessInstance> instancesWithTasks = new ArrayList<ProcessInstance>();
+        for (Task task : tasks) {
+            if (taskMap.get(task.getProcessInstanceId()) == null) {
+                taskMap.put(task.getProcessInstanceId(), new ArrayList<Task>());
+            }
+            taskMap.get(task.getProcessInstanceId()).add(task);
+        }
+        
+        for (ProcessInstance pi : instances) {
+            if (taskMap.get(pi.getId()) != null) {          
+                pi.getTasks().addAll(taskMap.get(pi.getId()));
+                instancesWithTasks.add(pi);
+            }
+
+        }
+        return  instancesWithTasks;
+         
+    }
 }

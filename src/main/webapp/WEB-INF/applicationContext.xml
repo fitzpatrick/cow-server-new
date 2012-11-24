@@ -71,6 +71,7 @@
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2HistoryActivity" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2Participation" />-->
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessInstance" />
+                <bean class="org.wiredwidgets.cow.server.convert.JbpmProcessInstanceLogToSc2ProcessInstance" />
                 <!--<bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2HistoryProcessInstance" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessDefinition" />-->
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2Task" />
@@ -170,9 +171,6 @@
     
     <bean id="kSessionManager" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionManager" init-method="init">
         <property name="kSession" ref="kSession" />
-        <property name="minaWorkItemHandler" ref="minaWorkItemHandler" />
-        <property name="kBase" ref="kBase" />
-        <property name="emf" ref="emf" />
     </bean>
     
     <bean id="testJBPMEventListener" class="org.wiredwidgets.cow.server.listener.TestJBPMEventListener">

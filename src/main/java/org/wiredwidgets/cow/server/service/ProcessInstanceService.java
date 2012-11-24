@@ -18,7 +18,7 @@ public interface ProcessInstanceService {
      * @param processInstanceId
      * @return
      */
-    ProcessInstance getProcessInstance(String processInstanceId);
+    ProcessInstance getProcessInstance(String processId, Long processExt);
 
     /**
      * Execute the BPM process identified by the processDefinitionKey of the ProcessInstance 

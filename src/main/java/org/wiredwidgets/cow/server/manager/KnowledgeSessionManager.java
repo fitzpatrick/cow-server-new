@@ -26,13 +26,9 @@ import org.jbpm.task.utils.ContentMarshallerContext;
  */
 public class KnowledgeSessionManager {
     StatefulKnowledgeSession kSession;
-    MinaHTWorkItemHandler minaWorkItemHandler;
-    KnowledgeBase kBase;
-    EntityManagerFactory emf;
     
     public void init() {
-        //minaWorkItemHandler = new MinaHTWorkItemHandler(kSession);
-        //kSession.getWorkItemManager().registerWorkItemHandler("Human Task", minaWorkItemHandler);
+        
     }
     
     public StatefulKnowledgeSession getkSession() {
@@ -41,29 +37,5 @@ public class KnowledgeSessionManager {
     
     public void setkSession(StatefulKnowledgeSession kSession) {
         this.kSession = kSession;
-    }
-    
-    public KnowledgeBase getkBase() {
-        return kBase;
-    }
-    
-    public void setkBase(KnowledgeBase kBase) {
-        this.kBase = kBase;
-    }
-    
-    public EntityManagerFactory getemf() {
-        return emf;
-    }
-    
-    public void setemf(EntityManagerFactory emf) {
-        this.emf = emf;
-    }
-    
-    public MinaHTWorkItemHandler getminaWorkItemHandler() {
-        return minaWorkItemHandler;
-    }
-    
-    public void setminaWorkItemHandler(MinaHTWorkItemHandler minaWorkItemHandler) {
-        this.minaWorkItemHandler = minaWorkItemHandler;
     }
 }

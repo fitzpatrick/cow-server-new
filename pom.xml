@@ -89,6 +89,12 @@
             <artifactId>spring-beans</artifactId>
             <version>${org.springframework.version}</version>
         </dependency>
+        
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+            <version>1.6.1</version>
+        </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
@@ -183,6 +189,11 @@
         <dependency>
             <groupId>org.jbpm</groupId>
             <artifactId>jbpm-workitems</artifactId>
+            <version>${org.jbpm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jbpm</groupId>
+            <artifactId>jbpm-bam</artifactId>
             <version>${org.jbpm.version}</version>
         </dependency>
         <dependency>

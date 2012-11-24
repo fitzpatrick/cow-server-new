@@ -57,7 +57,6 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
             target.setAssignee(source.getActualOwner().getId());
         }
 
-        
         if (source.getCreatedOn() != null) {
             target.setCreateTime(this.getConverter().convert(source.getCreatedOn(), XMLGregorianCalendar.class));
         }
@@ -67,6 +66,7 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
         }
         target.setId(String.valueOf(source.getId()));
         target.setPriority(new Integer(source.getPriority()));
+        target.setProcessInstanceId(Long.toString(source.getId()));
         
         // add task outcomes using the "Options" variable from the task
         org.jbpm.task.Task task = taskClient.getTask(source.getId());        

@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.log4j.Logger;
+import org.jbpm.process.audit.JPAProcessInstanceDbLog;
+import org.jbpm.process.audit.JPAWorkingMemoryDbLogger;
+import org.jbpm.process.audit.ProcessInstanceLog;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     public static Logger log = Logger.getLogger(ProcessInstanceServiceImpl.class);
     private static TypeDescriptor JBPM_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.drools.runtime.process.ProcessInstance.class));
+    private static TypeDescriptor JBPM_PROCESS_INSTANCE_LOG_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ProcessInstanceLog.class));
     //private static TypeDescriptor JBPM_HISTORY_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryProcessInstance.class));
     private static TypeDescriptor COW_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ProcessInstance.class));
 
@@ -73,10 +77,14 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Transactional(readOnly = true)
     @Override
-    public ProcessInstance getProcessInstance(String processInstanceId) {
-        org.drools.runtime.process.ProcessInstance pi = kSession.getProcessInstance(Long.valueOf(processInstanceId));
-        Map<String,Object> var = pi.getProcess().getMetaData();
-        return (pi == null) ? null : converter.convert(pi, ProcessInstance.class);
+    public ProcessInstance getProcessInstance(String processId, Long processExt) {
+        List<ProcessInstanceLog> processInstances = JPAProcessInstanceDbLog.findActiveProcessInstances(processId);
+        for (ProcessInstanceLog processInstance: processInstances){
+            if (processExt.equals(processInstance.getId())){
+                return this.converter.convert(processInstance, ProcessInstance.class);
+            }
+        }
+        return null;
     }
 
     @Transactional(readOnly = true)
@@ -114,15 +122,9 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     @Transactional(readOnly = true)
     @Override
     public List<ProcessInstance> findProcessInstancesByKey(String key) {
-        List<ProcessInstance> procList = getCOWProcessInstances();
+        List<ProcessInstanceLog> processInstances = JPAProcessInstanceDbLog.findActiveProcessInstances(key);
 
-        for (ProcessInstance proc : procList) {
-            if (proc.getKey() != null && !proc.getKey().equals(key)) {
-                procList.remove(proc);
-            }
-        }
-
-        return procList;
+        return this.convertProcessInstanceLogs(processInstances);
     }
 
     @Override
@@ -153,18 +155,22 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     private List<ProcessInstance> convertProcessInstances(List<org.drools.runtime.process.ProcessInstance> source) {
         return (List<ProcessInstance>) converter.convert(source, JBPM_PROCESS_INSTANCE_LIST, COW_PROCESS_INSTANCE_LIST);
     }
+    
+    private List<ProcessInstance> convertProcessInstanceLogs(List<ProcessInstanceLog> source) {
+        return (List<ProcessInstance>) converter.convert(source, JBPM_PROCESS_INSTANCE_LOG_LIST, COW_PROCESS_INSTANCE_LIST);
+    }
 
     private List<ProcessInstance> getCOWProcessInstances() {
-        Collection<org.drools.runtime.process.ProcessInstance> processColl = kSession.getProcessInstances();
-        List processList;
-        if (processColl instanceof List) {
-            processList = (List) processColl;
-        } else {
-            processList = new ArrayList(processColl);
+        //Collection<org.drools.runtime.process.ProcessInstance> processColl = kSession.getProcessInstances();
+        List<ProcessInstanceLog> allProcessInstances = JPAProcessInstanceDbLog.findProcessInstances();
+        List<ProcessInstanceLog> activeProcessInstances = new ArrayList<ProcessInstanceLog>();
+        
+        for (ProcessInstanceLog processInstance: allProcessInstances){
+            if (processInstance.getEnd() == null){
+                activeProcessInstances.add(processInstance);
+            } 
         }
-
-        //Collections.sort(processList);
-        return this.convertProcessInstances(processList);
+        return this.convertProcessInstanceLogs(activeProcessInstances);
 
     }
 }
