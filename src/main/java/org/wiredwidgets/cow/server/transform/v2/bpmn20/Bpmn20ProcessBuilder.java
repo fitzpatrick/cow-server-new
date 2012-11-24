@@ -40,6 +40,9 @@ import org.wiredwidgets.cow.server.transform.v2.Builder;
  */
 @Component
 public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
+	
+	public static final String VARIABLES_PROPERTY = "variables";
+	public static final String PROCESS_INSTANCE_NAME_PROPERTY = "processInstanceName";
     
     private static ObjectFactory factory = new ObjectFactory();
     
@@ -67,7 +70,10 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
         Bpmn20ProcessContext context = new Bpmn20ProcessContext(source, definitions, process);
         
         // Every process has a Map for ad-hoc content
-        context.addProcessVariable("content", "java.util.Map");
+        context.addProcessVariable(VARIABLES_PROPERTY, "java.util.Map");
+        
+        // Name for the process instance
+        context.addProcessVariable(PROCESS_INSTANCE_NAME_PROPERTY, "String");
              
         // Add any additional variables defined in the workflow
         if (source.getVariables() != null) {

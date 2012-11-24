@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Variable;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 
 /**
  *
@@ -44,6 +45,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
          */
 
         Map<String, Object> vars = new HashMap<String, Object>();
+        Map<String, Object> processVars = new HashMap<String, Object>();
         
         //content.put("content", new HashMap<String,Object>());
         if (instance.getVariables() != null) {
@@ -54,8 +56,15 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         // COW-65 save history for all variables
         // org.jbpm.api.ProcessInstance pi = executionService.startProcessInstanceByKey(instance.getProcessDefinitionKey(), vars);
         
+        if (vars.size() > 0) {
+        	processVars.put(Bpmn20ProcessBuilder.VARIABLES_PROPERTY, vars);
+        }
         
-        org.drools.runtime.process.ProcessInstance pi = kSession.startProcess(instance.getProcessDefinitionKey(), vars);
+        if (instance.getName() != null) {
+        	processVars.put(Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY, instance.getName());
+        }
+                
+        org.drools.runtime.process.ProcessInstance pi = kSession.startProcess(instance.getProcessDefinitionKey(), processVars);
         instance.setId(Long.toString(pi.getId()));
         /*
          * //create the process name as a history-tracked variable if
@@ -134,22 +143,22 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Override
     public Process getProcessInstanceStatus(String processInstanceId) {
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new Process();//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<ProcessInstance> findAllHistoryProcessInstances() {
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new ArrayList<ProcessInstance>();//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public List<ProcessInstance> findHistoryProcessInstances(String key, Date endedAfter, boolean ended) {
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new ArrayList<ProcessInstance>();//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public Process getV2Process(String processInstanceId) {
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new Process();//throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private List<ProcessInstance> convertProcessInstances(List<org.drools.runtime.process.ProcessInstance> source) {

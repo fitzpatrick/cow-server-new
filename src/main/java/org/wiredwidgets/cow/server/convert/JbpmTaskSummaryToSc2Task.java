@@ -30,6 +30,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder;
 
 /**
  *
@@ -68,27 +69,36 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
         target.setPriority(new Integer(source.getPriority()));
         target.setProcessInstanceId(Long.toString(source.getId()));
         
-        // add task outcomes using the "Options" variable from the task
+        
         org.jbpm.task.Task task = taskClient.getTask(source.getId());        
         Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());      
         Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
         		"org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", 
         		content.getContent(), 
-        		minaWorkItemHandler.getMarshallerContext(), null); 
+        		minaWorkItemHandler.getMarshallerContext(), null);  
         
-        if (map.containsKey("Options")){
-            String[] options = ( (String) map.get("Options") ).split(",");
-            target.getOutcomes().addAll(Arrays.asList(options));
+        for (String key : map.keySet()) {
+        	log.debug("Key: " + key);
         }
         
-        // get ad-hoc variables from the "Content" map
-        if (map.containsKey("Content")){
-            Map<String, Object> contentMap = (Map<String, Object>) map.get("Content");
-            if (contentMap != null) {
-                    for (Map.Entry<String, Object> entry : contentMap.entrySet()) {
-                            addVariable(target, entry.getKey(), entry.getValue());
-                    }
-            }
+        // add task outcomes using the "Options" variable from the task
+        String optionsString = (String) map.get("Options");
+        if (optionsString != null) {     
+	        String[] options = ( (String) map.get("Options") ).split(",");
+	        target.getOutcomes().addAll(Arrays.asList(options));
+        }
+        
+        // get ad-hoc variables map
+       
+        Map<String, Object> contentMap = (Map<String, Object>) map.get(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME);
+        if (contentMap != null) {
+	        for (Entry<String, Object> entry : contentMap.entrySet()) {
+	        	log.debug(entry.getKey() + "=" + entry.getValue());
+	        	addVariable(target, entry.getKey(), entry.getValue());
+	        }
+        }
+        else {
+        	log.debug("No Content found for task");
         }
 
         // add variables

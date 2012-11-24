@@ -20,15 +20,27 @@ import java.util.*;
 import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
-import org.wiredwidgets.cow.server.api.service.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.wiredwidgets.cow.server.api.service.HistoryActivities;
+import org.wiredwidgets.cow.server.api.service.ProcessInstance;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
+import org.wiredwidgets.cow.server.api.service.ProcessInstances;
+import org.wiredwidgets.cow.server.api.service.Variable;
+import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 import org.wiredwidgets.cow.server.service.TaskService;
+import org.wiredwidgets.cow.server.service.ProcessService;
 
 
 /**
@@ -40,8 +52,8 @@ import org.wiredwidgets.cow.server.service.TaskService;
 public class ProcessInstancesController extends CowServerController{
     private static Logger log = Logger.getLogger(ProcessInstancesController.class);
     
-    //@Autowired
-    //ProcessService processService;
+    @Autowired
+    ProcessService processService;
     @Autowired
     ProcessInstanceService processInstanceService;
     @Autowired
@@ -62,16 +74,18 @@ public class ProcessInstancesController extends CowServerController{
      * @param req 
      */
     @RequestMapping(value = "/active", method = RequestMethod.POST, params = "!execute")
-    public void startExecution(@RequestBody org.wiredwidgets.cow.server.api.service.ProcessInstance pi, @RequestParam(value = "init-vars", required = false) boolean initVars, HttpServletResponse response, HttpServletRequest req) {
+    public void startExecution(@RequestBody ProcessInstance pi, @RequestParam(value = "init-vars", required = false) boolean initVars, HttpServletResponse response, HttpServletRequest req) {
         log.debug("startExecution: " + pi.getProcessDefinitionKey());
         
         // option to initialize the process instance with variables / values set in the master process
-        /*if (initVars) {
-            org.wiredwidgets.cow.server.api.model.v2.Process process = processService.getV2Process(pi.getProcessDefinitionKey());
-            for (org.wiredwidgets.cow.server.api.model.v2.Variable var : process.getVariables().getVariables()) {
-                addVariable(pi, var.getName(), var.getValue());
+        if (initVars) {
+            Process process = processService.getV2Process(pi.getProcessDefinitionKey());
+            if (process.getVariables() != null) {
+	            for (org.wiredwidgets.cow.server.api.model.v2.Variable var : process.getVariables().getVariables()) {
+	                addVariable(pi, var.getName(), var.getValue());
+	            }
             }
-        }*/
+        }
         
         String id = processInstanceService.executeProcess(pi);
         
@@ -194,7 +208,7 @@ public class ProcessInstancesController extends CowServerController{
         List<HistoryActivity> activities = taskService.getHistoryActivities(decode(id) + '.' + ext);
         ha.getHistoryActivities().addAll(activities);
         return ha;*/
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new HistoryActivities();//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -210,7 +224,7 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public org.wiredwidgets.cow.server.api.model.v2.Process getProcessInstanceStatus(@PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
         //return processInstanceService.getProcessInstanceStatus(decode(id) + "." + ext);
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new org.wiredwidgets.cow.server.api.model.v2.Process();//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -265,7 +279,7 @@ public class ProcessInstancesController extends CowServerController{
         /*ProcessInstances pi = new ProcessInstances();
         pi.getProcessInstances().addAll(processInstanceService.findHistoryProcessInstances(key, endedAfter, ended));
         return pi;*/
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
     }  
     
     /**
@@ -280,7 +294,7 @@ public class ProcessInstancesController extends CowServerController{
     public ProcessInstances getProcessInstancesWithTasks() {
         
         //return createProcessInstances(mergeTasks(taskService.findAllTasks()));
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**
@@ -307,7 +321,7 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public ProcessInstances getProcessInstancesWithUnassignedTasks() {
         //return createProcessInstances(mergeTasks(taskService.findAllUnassignedTasks()));
-        return null;//throw new UnsupportedOperationException("Not supported yet.");
+        return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**

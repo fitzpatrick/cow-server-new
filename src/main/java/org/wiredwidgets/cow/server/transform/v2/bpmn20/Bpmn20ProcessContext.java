@@ -16,19 +16,26 @@
 
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
+
 import org.apache.log4j.Logger;
-import org.wiredwidgets.cow.server.transform.v2.AbstractProcessContext;
 import org.omg.spec.bpmn._20100524.di.BPMNDiagram;
 import org.omg.spec.bpmn._20100524.di.BPMNEdge;
 import org.omg.spec.bpmn._20100524.di.BPMNPlane;
 import org.omg.spec.bpmn._20100524.di.BPMNShape;
-import org.omg.spec.bpmn._20100524.model.*;
+import org.omg.spec.bpmn._20100524.model.Definitions;
+import org.omg.spec.bpmn._20100524.model.Property;
+import org.omg.spec.bpmn._20100524.model.TFlowElement;
+import org.omg.spec.bpmn._20100524.model.TItemDefinition;
+import org.omg.spec.bpmn._20100524.model.TProcess;
 import org.omg.spec.dd._20100524.dc.Bounds;
 import org.omg.spec.dd._20100524.dc.Point;
-
 import org.wiredwidgets.cow.server.api.model.v2.Process;
+import org.wiredwidgets.cow.server.transform.v2.AbstractProcessContext;
 
 
 /**
@@ -45,7 +52,8 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<JAXBElement<TFl
     private int xPosition = 100;
     private static org.omg.spec.bpmn._20100524.di.ObjectFactory diFactory = new org.omg.spec.bpmn._20100524.di.ObjectFactory();
     private static org.omg.spec.bpmn._20100524.model.ObjectFactory modelFactory = new org.omg.spec.bpmn._20100524.model.ObjectFactory();
-    
+    private Map<String, Property> properties = new HashMap<String, Property>();
+        
     public Bpmn20ProcessContext(Process source, Definitions definitions, TProcess target) {
         super(source, target);
         this.definitions = definitions;
@@ -99,7 +107,12 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<JAXBElement<TFl
         Property prop = new Property();
         prop.setId(itemName);
         prop.setItemSubjectRef(new QName(id));
-        getTarget().getProperties().add(prop);    
+        getTarget().getProperties().add(prop);  
+        properties.put(itemName, prop);
         return prop;
-    }    
+    } 
+    
+    protected Property getProcessVariable(String name) {
+    	return properties.get(name);
+    }
 }

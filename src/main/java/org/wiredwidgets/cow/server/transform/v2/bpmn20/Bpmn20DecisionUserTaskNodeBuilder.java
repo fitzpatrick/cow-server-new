@@ -34,6 +34,8 @@ import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 public class Bpmn20DecisionUserTaskNodeBuilder extends Bpmn20UserTaskNodeBuilder {
     
     private List<Option> options = new ArrayList<Option>();
+    
+    public static final String DECISION_VAR_NAME = "DecisionVarName";
 
 
     public Bpmn20DecisionUserTaskNodeBuilder(ProcessContext context, Decision decision) {
@@ -53,10 +55,10 @@ public class Bpmn20DecisionUserTaskNodeBuilder extends Bpmn20UserTaskNodeBuilder
                    
         addDataInput("Options", getOptionsString());
         String decisionVar = getNode().getId() + "_decision";
-        addDataOutput(decisionVar, true);
+        addDataOutput(decisionVar, decisionVar);
         
         // We need to be able to know the name of the decision variable
-        addDataInput("DecisionVarName", decisionVar);
+        addDataInput(DECISION_VAR_NAME, decisionVar);
         
         // this is picked up in GatewayDecisionActivityBuilder
         setBuildProperty("decisionVar", decisionVar);
