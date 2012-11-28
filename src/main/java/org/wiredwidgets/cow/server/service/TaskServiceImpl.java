@@ -4,6 +4,11 @@
  */
 package org.wiredwidgets.cow.server.service;
 
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DecisionUserTaskNodeBuilder.DECISION_VAR_NAME;
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME;
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME;
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.VARIABLES_PROPERTY;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -14,6 +19,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
 import org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy;
+import org.drools.runtime.process.WorkflowProcessInstance;
 import org.jbpm.task.Content;
 import org.jbpm.task.Deadline;
 import org.jbpm.task.Deadlines;
@@ -34,8 +40,6 @@ import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.Participation;
 import org.wiredwidgets.cow.server.api.service.Task;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder.*;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DecisionUserTaskNodeBuilder.DECISION_VAR_NAME;
 
 /**
  *
@@ -112,7 +116,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         org.jbpm.task.Task task = taskClient.getTask(id);
         Content inputContent = taskClient.getContent(task.getTaskData().getDocumentContentId());        
         Map<String, Object> inputMap = (Map<String, Object>) ContentMarshallerHelper.unmarshall(SerializablePlaceholderResolverStrategy.class.getName(), inputContent.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
-        
+         
         for (Map.Entry<String, Object> entry : inputMap.entrySet()){
             log.debug(entry.getKey() + " = " + entry.getValue());
         }
@@ -125,8 +129,16 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	outputMap.put((String)inputMap.get(DECISION_VAR_NAME), outcome);
         }        
                
-        Map<String, Object> outputVarsMap = new HashMap<String, Object>();       
-        Map<String, Object> inputVarsMap = (Map<String, Object>) inputMap.get(TASK_INPUT_VARIABLES_NAME);
+        Map<String, Object> outputVarsMap = new HashMap<String, Object>();   
+        
+        // NOTE: obtaining the map from the Task results in a copy of the map as of the
+        // time when the task became available.  It's possible that in the meantime (e.g. due to
+        // a parallel task) the map has been altered.  
+        // Map<String, Object> inputVarsMap = (Map<String, Object>) inputMap.get(TASK_INPUT_VARIABLES_NAME);
+              
+        // So, instead, we get the current values directly from the process instance, rather than the values copied into the task
+        WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(task.getTaskData().getProcessInstanceId());
+        Map<String, Object> inputVarsMap = (Map<String, Object>) pi.getVariable(VARIABLES_PROPERTY);
         
         if (inputVarsMap != null) {
         	// initialize the output map with the input values
