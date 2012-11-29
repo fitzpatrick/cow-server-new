@@ -46,6 +46,8 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
         for (String group: groups){
             Group temp = new Group();
             temp.setId(group);
+            temp.setName(group);
+            
             groupList.add(temp);
         }
         return groupList;
@@ -67,7 +69,14 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
     @Transactional(readOnly = true)
     @Override
     public Group findGroup(String id) {
-        return new Group();//throw new UnsupportedOperationException("Not supported yet.");
+        if (groups.contains(id)){
+            Group group = new Group();
+            group.setId(id);
+            group.setName(id);
+            return group;
+        } 
+        
+        return null;
     }
 
     @Transactional(readOnly = true)

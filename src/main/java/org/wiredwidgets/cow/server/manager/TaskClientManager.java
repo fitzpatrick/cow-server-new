@@ -4,19 +4,14 @@
  */
 package org.wiredwidgets.cow.server.manager;
 
-import org.drools.SystemEventListenerFactory;
-import org.jbpm.task.TaskService;
-import org.jbpm.task.service.SyncTaskServiceWrapper;
-import org.jbpm.task.service.mina.AsyncMinaTaskClient;
-import org.jbpm.task.service.mina.MinaTaskClientConnector;
-import org.jbpm.task.service.mina.MinaTaskClientHandler;
+import org.jbpm.task.service.TaskClient;
 
 /**
  *
  * @author FITZPATRICK
  */
 public class TaskClientManager {
-    TaskService taskClient;
+    TaskClient taskClient;
     
     public void init(){
         //taskClient = new TaskClient(new MinaTaskClientConnector("client 1", new MinaTaskClientHandler(SystemEventListenerFactory.getSystemEventListener())));
@@ -27,7 +22,7 @@ public class TaskClientManager {
         
     }
     
-    public void settaskClient(TaskService taskClient){
+    public void settaskClient(TaskClient taskClient){
         this.taskClient = taskClient;
     }
 }

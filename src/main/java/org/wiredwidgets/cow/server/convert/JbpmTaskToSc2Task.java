@@ -11,6 +11,8 @@ import org.apache.log4j.Logger;
 import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
 import org.jbpm.task.Content;
 import org.jbpm.task.TaskData;
+import org.jbpm.task.service.responsehandlers.BlockingGetContentResponseHandler;
+import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
 import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
@@ -26,7 +28,7 @@ public class JbpmTaskToSc2Task extends AbstractConverter implements Converter<or
 
     // NOTE: Autowiring does not work here!
     @Autowired
-    org.jbpm.task.TaskService taskClient;
+    org.jbpm.task.service.TaskClient taskClient;
     
     @Autowired
     MinaHTWorkItemHandler minaWorkItemHandler;
@@ -60,12 +62,16 @@ public class JbpmTaskToSc2Task extends AbstractConverter implements Converter<or
         target.setPriority(new Integer(s.getPriority()));
         
         // add task outcomes using the "Options" variable from the task
-        org.jbpm.task.Task task = taskClient.getTask(s.getId());        
-        Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());      
+        BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
+        taskClient.getTask(s.getId(), getTaskResponseHandler);  
+        org.jbpm.task.Task task = getTaskResponseHandler.getTask();
+        
+        BlockingGetContentResponseHandler getContentResponseHandler = new BlockingGetContentResponseHandler();
+        taskClient.getContent(task.getTaskData().getDocumentContentId(), getContentResponseHandler);   
+        Content content = getContentResponseHandler.getContent();
+        
         Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
-        		"org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", 
-        		content.getContent(), 
-        		minaWorkItemHandler.getMarshallerContext(), null);  
+        		content.getContent(), null);  
         
         if (map.containsKey("Options")){
             String[] options = ( (String) map.get("Options") ).split(",");

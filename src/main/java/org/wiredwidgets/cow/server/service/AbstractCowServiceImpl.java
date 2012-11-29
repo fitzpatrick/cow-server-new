@@ -41,7 +41,7 @@ public class AbstractCowServiceImpl {
     protected StatefulKnowledgeSession kSession;
     
     @Autowired
-    protected org.jbpm.task.TaskService taskClient;
+    protected org.jbpm.task.service.TaskClient taskClient;
     
     @Autowired
     protected HashMap<String,List<String>> userGroups;

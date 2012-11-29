@@ -37,7 +37,7 @@ public class TestHumanVars {
     protected MinaHTWorkItemHandler minaWorkItemHandler;
     
     public void testHumanVars(){
-        Map<String, Object> params = new HashMap<String, Object>();
+        /*Map<String, Object> params = new HashMap<String, Object>();
         params.put("varOne", "Here is variable one");
         kSession.startProcess("TestVariable", params);
         
@@ -103,7 +103,7 @@ public class TestHumanVars {
             taskClient.disconnect();
         } catch (Exception ex) {
             Logger.getLogger(TestHumanVars.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        }*/
     }
     
     public void startWorkflow(){
@@ -130,7 +130,7 @@ public class TestHumanVars {
         //Task task = taskClient.getTask(task1.getId());
         Task task = taskClient.getTask(id);
         
-        Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());
+       /* Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());
         
         Object result = ContentMarshallerHelper.unmarshall("org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", content.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
         Map<?,?> map = (Map<?,?>)result;
@@ -139,10 +139,10 @@ public class TestHumanVars {
         }
         
         
-        ContentData contentData = ContentMarshallerHelper.marshal(results, minaWorkItemHandler.getMarshallerContext(), null);
+        ContentData contentData = ContentMarshallerHelper.marshal(results, minaWorkItemHandler.getMarshallerContext(), null);*/
         
         //taskClient.complete(task1.getId(), "shawn", contentData);
-        taskClient.complete(id, assignee, contentData);
+        //taskClient.complete(id, assignee, contentData);
         
         
         /*try {

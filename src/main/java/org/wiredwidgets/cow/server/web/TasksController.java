@@ -57,8 +57,6 @@ public class TasksController {
     @Autowired
     TaskService taskService;
     @Autowired
-    protected org.jbpm.task.TaskService taskClient;
-    @Autowired
     protected HashMap userGroups;
     @Autowired
     protected MinaHTWorkItemHandler minaWorkItemHandler;
@@ -273,7 +271,7 @@ public class TasksController {
     public Tasks getUnassignedTasks() {
         Tasks tasks = new Tasks();
         try{        
-        tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
+            tasks.getTasks().addAll(taskService.findAllUnassignedTasks());
         //return tasks;
         }catch(Exception e){
             log.error(e);
@@ -313,13 +311,9 @@ public class TasksController {
     @RequestMapping(value = "/active", params = "processInstance")
     @ResponseBody
     public Tasks getTasksByProcessInstance(@RequestParam("processInstance") String processInstance) {
-        /*
-         * Tasks tasks = new Tasks();
-         * tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(processInstance));
-         * return tasks;
-         */
-        return new Tasks();
-        //throw new UnsupportedOperationException("Not supported yet.");
+        Tasks tasks = new Tasks();
+        tasks.getTasks().addAll(taskService.findAllTasksByProcessInstance(Long.decode(processInstance)));
+        return tasks;
     }
 
     /**

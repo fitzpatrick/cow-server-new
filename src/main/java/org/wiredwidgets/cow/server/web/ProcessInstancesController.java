@@ -41,7 +41,7 @@ import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 import org.wiredwidgets.cow.server.service.TaskService;
 import org.wiredwidgets.cow.server.service.ProcessService;
-
+import org.wiredwidgets.cow.server.api.service.Task;
 
 /**
  *

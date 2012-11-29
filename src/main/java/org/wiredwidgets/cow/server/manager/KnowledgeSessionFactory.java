@@ -18,6 +18,8 @@ import org.jbpm.process.audit.JPAWorkingMemoryDbLogger;
 import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
+import org.apache.log4j.Logger;
+import org.jbpm.process.workitem.wsht.CommandBasedWSHumanTaskHandler;
 
 /**
  *
@@ -36,7 +38,10 @@ public class KnowledgeSessionFactory {
     @Autowired
     MinaHTWorkItemHandler minaWorkItemHandler;
     
+    public static Logger log = Logger.getLogger(KnowledgeSessionFactory.class);
+    
     public StatefulKnowledgeSession createInstance(){
+        StatefulKnowledgeSession kSession;
         Environment env = KnowledgeBaseFactory.newEnvironment();
         env.set(EnvironmentName.ENTITY_MANAGER_FACTORY, emf);
         env.set(EnvironmentName.TRANSACTION_MANAGER, txManager);
@@ -46,7 +51,13 @@ public class KnowledgeSessionFactory {
         properties.put("drools.processSignalManagerFactory", "org.jbpm.persistence.processinstance.JPASignalManagerFactory");
         KnowledgeSessionConfiguration config = KnowledgeBaseFactory.newKnowledgeSessionConfiguration(properties);
         
-        StatefulKnowledgeSession kSession = JPAKnowledgeService.newStatefulKnowledgeSession(kBase, config, env);
+        try{
+            kSession = JPAKnowledgeService.loadStatefulKnowledgeSession(1, kBase, config, env);
+        } catch (Exception e){
+            log.error("Could not find session with ID 1. Creating a new session");
+            kSession = JPAKnowledgeService.newStatefulKnowledgeSession(kBase, config, env);
+        }
+        
         new JPAWorkingMemoryDbLogger(kSession);
         JPAProcessInstanceDbLog.setEnvironment(env);
         minaWorkItemHandler = new MinaHTWorkItemHandler(kSession);

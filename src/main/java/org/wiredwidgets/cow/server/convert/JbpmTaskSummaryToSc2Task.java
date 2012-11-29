@@ -24,6 +24,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.log4j.Logger;
 import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
 import org.jbpm.task.Content;
+import org.jbpm.task.service.responsehandlers.BlockingGetContentResponseHandler;
+import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
 import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
@@ -40,7 +42,7 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
 
     // NOTE: Autowiring does not work here!
     @Autowired
-    org.jbpm.task.TaskService taskClient;
+    org.jbpm.task.service.TaskClient taskClient;
     
     @Autowired
     MinaHTWorkItemHandler minaWorkItemHandler;
@@ -67,15 +69,18 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
         }
         target.setId(String.valueOf(source.getId()));
         target.setPriority(new Integer(source.getPriority()));
-        target.setProcessInstanceId(Long.toString(source.getId()));
+        target.setProcessInstanceId(Long.toString(source.getProcessInstanceId()));
         
+        BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
+        taskClient.getTask(source.getId(), getTaskResponseHandler);        
+        org.jbpm.task.Task task = getTaskResponseHandler.getTask();
         
-        org.jbpm.task.Task task = taskClient.getTask(source.getId());        
-        Content content = taskClient.getContent(task.getTaskData().getDocumentContentId());      
+        BlockingGetContentResponseHandler getContentResponseHandler = new BlockingGetContentResponseHandler();
+        taskClient.getContent(task.getTaskData().getDocumentContentId(), getContentResponseHandler); 
+        Content content = getContentResponseHandler.getContent();
+        
         Map<String, Object> map = (Map<String, Object>) ContentMarshallerHelper.unmarshall(
-        		"org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy", 
-        		content.getContent(), 
-        		minaWorkItemHandler.getMarshallerContext(), null);  
+        		content.getContent(),null);  
         
         for (String key : map.keySet()) {
         	log.debug("Key: " + key);

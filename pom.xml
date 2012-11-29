@@ -11,10 +11,10 @@
     <name>cow-server-new</name>
 
     <properties>
-        <org.jbpm.version>5.3.0.Final</org.jbpm.version>
+        <org.jbpm.version>5.4.0.Final</org.jbpm.version>
         <!--<copyright.basedir>${basedir}../../..</copyright.basedir>-->
         <org.springframework.version>3.1.0.RELEASE</org.springframework.version>
-        <org.drools.version>5.4.0.Final</org.drools.version>
+        <org.drools.version>5.5.0.Final</org.drools.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
     </properties>
@@ -229,12 +229,12 @@
         <!--<dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-annotations</artifactId>
-            <version>3.4.0.GA</version>
+            <version>3.5.6-Final</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-commons-annotations</artifactId>
-            <version>3.1.0.GA</version>
+            <version>3.2.0.Final</version>
         </dependency>-->
         <dependency>
             <groupId>org.hibernate</groupId>

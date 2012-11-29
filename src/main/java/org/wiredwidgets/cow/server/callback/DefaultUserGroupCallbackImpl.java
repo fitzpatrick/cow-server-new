@@ -5,15 +5,19 @@
 package org.wiredwidgets.cow.server.callback;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import org.jbpm.task.service.UserGroupCallback;
+import org.jbpm.task.identity.UserGroupCallback;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  *
  * @author FITZPATRICK
  */
 public class DefaultUserGroupCallbackImpl implements UserGroupCallback{
-
+    @Autowired
+    HashMap userGroups;
+    
     @Override
     public boolean existsUser(String userId) {
         return true;
@@ -26,20 +30,9 @@ public class DefaultUserGroupCallbackImpl implements UserGroupCallback{
 
     @Override
     public List<String> getGroupsForUser(String userId, List<String> groupIds, List<String> allExistingGroupIds) {
-        if(groupIds != null) {
-            List<String> retList = new ArrayList<String>(groupIds);
-            // merge all groups
-            if(allExistingGroupIds != null) {
-                for(String grp : allExistingGroupIds) {
-                    if(!retList.contains(grp)) {
-                        retList.add(grp);
-                    }
-                }
-            } 
-
-            return retList;
-        } else {
-            // return empty list by default
+        if (userGroups.containsKey(userId)){
+            return (List<String>)userGroups.get(userId);
+        } else{
             return new ArrayList<String>();
         }
     }

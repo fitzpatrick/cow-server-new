@@ -5,6 +5,7 @@
 package org.wiredwidgets.cow.server.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,6 +26,9 @@ import org.jbpm.task.TaskData;
 import org.jbpm.task.User;
 import org.jbpm.task.query.TaskSummary;
 import org.jbpm.task.service.ContentData;
+import org.jbpm.task.service.TaskClientHandler.QueryGenericResponseHandler;
+import org.jbpm.task.service.TaskClientHandler.TaskOperationResponseHandler;
+import org.jbpm.task.service.responsehandlers.*;
 import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -62,15 +66,13 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     public List<Task> findPersonalTasks(String assignee) {
         List<TaskSummary> tempTasks = new ArrayList<TaskSummary>();
         List<TaskSummary> tasks = new ArrayList<TaskSummary>();
-        List<String> groupsForUser = userGroups.get(assignee);
         
-        List<Status> status = new ArrayList<Status>();
-        status.add(Status.Reserved);
-        tempTasks.addAll(taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup(assignee, groupsForUser, status, "en-UK"));
+        BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
+        taskClient.getTasksAssignedAsPotentialOwner(assignee, "en-UK", taskSummaryResponseHandler);
+        tempTasks.addAll(taskSummaryResponseHandler.getResults());
         
-        for (TaskSummary task : tempTasks){
-            User u = task.getActualOwner();
-            if (u.getId().equals(assignee)){
+       for (TaskSummary task : tempTasks){
+            if (task.getStatus() == Status.Reserved && (task.getActualOwner() != null && task.getActualOwner().getId().equals(assignee))){
                 tasks.add(task);
             }
         }
@@ -87,14 +89,18 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasks() {
-        List<org.jbpm.task.Task> tasks = (List<org.jbpm.task.Task>)taskClient.query("select t from Task t where t.taskData.status in ('Created', 'Ready', 'Reserved', 'InProgress')", Integer.MAX_VALUE,0);
+        BlockingQueryGenericResponseHandler responseHandler = new BlockingQueryGenericResponseHandler();
+        taskClient.query("select t from Task t where t.taskData.status in ('Created', 'Ready', 'Reserved', 'InProgress')", Integer.MAX_VALUE,0,responseHandler);
+        List<org.jbpm.task.Task> tasks = (List<org.jbpm.task.Task>)responseHandler.getResults();
         return this.convertTasks(tasks);
     }
 
     @Transactional(readOnly = true)
     @Override
     public Task getTask(Long id) {
-        org.jbpm.task.Task task = taskClient.getTask(id);
+        BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
+        taskClient.getTask(id, getTaskResponseHandler);
+        org.jbpm.task.Task task = getTaskResponseHandler.getTask();
         return this.converter.convert(task, Task.class);
     }
 
@@ -108,10 +114,18 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     public void completeTask(Long id, String assignee, String outcome, Map<String, Object> variables) {
         log.debug(assignee + " starting task with ID: " + id);
         
-        taskClient.start(id, assignee);
-        org.jbpm.task.Task task = taskClient.getTask(id);
-        Content inputContent = taskClient.getContent(task.getTaskData().getDocumentContentId());        
-        Map<String, Object> inputMap = (Map<String, Object>) ContentMarshallerHelper.unmarshall(SerializablePlaceholderResolverStrategy.class.getName(), inputContent.getContent(), minaWorkItemHandler.getMarshallerContext(), null);
+        BlockingTaskOperationResponseHandler operationResponseHandler = new BlockingTaskOperationResponseHandler();
+        taskClient.start(id, assignee, operationResponseHandler);
+        
+        BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
+        taskClient.getTask(id, getTaskResponseHandler);
+        org.jbpm.task.Task task = getTaskResponseHandler.getTask();
+        
+        BlockingGetContentResponseHandler getContentResponseHandler = new BlockingGetContentResponseHandler();
+        taskClient.getContent(task.getTaskData().getDocumentContentId(), getContentResponseHandler);        
+        Content inputContent = getContentResponseHandler.getContent();
+        
+        Map<String, Object> inputMap = (Map<String, Object>) ContentMarshallerHelper.unmarshall(inputContent.getContent(), null);
         
         for (Map.Entry<String, Object> entry : inputMap.entrySet()){
             log.debug(entry.getKey() + " = " + entry.getValue());
@@ -145,19 +159,31 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         	outputMap.put(TASK_OUTPUT_VARIABLES_NAME, outputVarsMap);   
         }
         
-        ContentData contentData = ContentMarshallerHelper.marshal(outputMap, minaWorkItemHandler.getMarshallerContext(), null);      
-        taskClient.complete(id, assignee, contentData);
+        //kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), new HashMap<String,Object>());
+        BlockingTaskOperationResponseHandler taskResponseHandler = new BlockingTaskOperationResponseHandler();
+        ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);      
+        taskClient.complete(id, assignee, contentData, taskResponseHandler);
+        taskResponseHandler.waitTillDone(1000);
+        
+        final Map<String, Object> results = new HashMap<String, Object>();
+        kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), results);
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllUnassignedTasks() {
-        List<Status> status = new ArrayList<Status>();
-        status.add(Status.Created); 
-        status.add(Status.InProgress);
-        status.add(Status.Ready);
+        List<TaskSummary> tempTasks;
+        List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
-        List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup("Administrator", groups, status, "en-UK");
+        BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
+        taskClient.getTasksAssignedAsPotentialOwner("Administrator", "en-UK", taskSummaryResponseHandler);
+        tempTasks = taskSummaryResponseHandler.getResults();
+        
+        for (TaskSummary task : tempTasks){
+            if (task.getStatus() == Status.Ready){
+                tasks.add(task);
+            }
+        }
         
         return this.convertTaskSummarys(tasks);
     }
@@ -165,23 +191,26 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findGroupTasks(String user) {
-        // Need to add user groups to this
-        List<String> groupsForUser = userGroups.get(user);
+        List<TaskSummary> tempTasks = new ArrayList<TaskSummary>();
+        List<TaskSummary> tasks = new ArrayList<TaskSummary>();
         
-        List<Status> status = new ArrayList<Status>();
-        status.add(Status.Created); 
-        status.add(Status.InProgress);
-        status.add(Status.Ready);
+        BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
+        taskClient.getTasksAssignedAsPotentialOwner(user, "en-UK", taskSummaryResponseHandler);
+        tempTasks.addAll(taskSummaryResponseHandler.getResults());
         
-        List<TaskSummary> tasks = taskClient.getTasksAssignedAsPotentialOwnerByStatusByGroup(user, groupsForUser, status, "en-UK");
-        
+        for (TaskSummary task : tempTasks){
+            if (task.getStatus() == Status.Ready){
+                tasks.add(task);
+            }
+        }
+                
         return this.convertTaskSummarys(tasks);
     }
 
     @Override
     public void takeTask(Long taskId, String userId) {
-        List<String> groupsForUser = (List<String>) userGroups.get(userId);
-        taskClient.claim(taskId, userId, groupsForUser);
+        BlockingTaskOperationResponseHandler operationResponseHandler = new BlockingTaskOperationResponseHandler();
+        taskClient.claim(taskId, userId, operationResponseHandler);
     }
     
     @Override
@@ -192,8 +221,11 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public List<Task> findAllTasksByProcessInstance(Long id) {
-
-        return new ArrayList<Task>();//throw new UnsupportedOperationException("Not supported yet.");
+        List<Status> status = Arrays.asList(Status.Completed, Status.Created, Status.Error, Status.Exited, Status.Failed, Status.InProgress, Status.Obsolete, Status.Ready, Status.Reserved, Status.Suspended);
+        
+        BlockingTaskSummaryResponseHandler taskSummaryResponseHandler = new BlockingTaskSummaryResponseHandler();
+        taskClient.getTasksByStatusByProcessId(id, status, "en-UK", taskSummaryResponseHandler);
+        return this.convertTaskSummarys(taskSummaryResponseHandler.getResults());
     }
 
     @Transactional(readOnly = true)
@@ -302,7 +334,9 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
             newTask = true;
             target = new org.jbpm.task.Task();
         } else {
-            target = taskClient.getTask(Long.valueOf(source.getId()));
+            BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
+            taskClient.getTask(Long.valueOf(source.getId()), getTaskResponseHandler);
+            target = getTaskResponseHandler.getTask();
         }
         if (target == null) {
             return null;
@@ -359,7 +393,8 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
          */
 
         if (newTask) {
-            taskClient.addTask(target, null);
+            BlockingAddTaskResponseHandler addTaskResponseHandler = new BlockingAddTaskResponseHandler();
+            taskClient.addTask(target, null, addTaskResponseHandler);
         }
 
         return target;

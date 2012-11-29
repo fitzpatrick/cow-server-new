@@ -114,6 +114,8 @@
     
     <bean id="groups" class="java.util.ArrayList" />
     
+    <bean id="userGroupCallback" class="org.wiredwidgets.cow.server.callback.DefaultUserGroupCallbackImpl" />
+    
     <bean id="taskServiceSessionManager" class="org.wiredwidgets.cow.server.manager.TaskServiceSessionManagerImpl" init-method="init" >
         <property name="jbpmTaskService" ref="jbpmTaskService" />
         <property name="userGroups" ref="userGroups" />
@@ -124,17 +126,18 @@
     
     <bean id="minaTaskServerManager" class="org.wiredwidgets.cow.server.manager.MinaTaskServerManager" init-method="init" >
         <property name="minaTaskServer" ref="minaTaskServer" />
+        <property name="userGroupCallback" ref="userGroupCallback" />
     </bean>
     
-    <!--<bean id="minaTaskClientHandler" class="org.jbpm.task.service.mina.MinaTaskClientHandler" c:systemEventListener-ref="sel"/>
+    <bean id="minaTaskClientHandler" class="org.jbpm.task.service.mina.MinaTaskClientHandler" c:systemEventListener-ref="sel"/>
     
     <bean id="minaTaskClientConnector" class="org.jbpm.task.service.mina.MinaTaskClientConnector">
         <constructor-arg type="java.lang.String" value="client 1" />
         <constructor-arg ref="minaTaskClientHandler" />
-    </bean>-->
+    </bean>
     
-    <bean id="minaTaskClient" class="org.jbpm.task.service.mina.AsyncMinaTaskClient" />
-    <bean id="taskClient" class="org.jbpm.task.service.SyncTaskServiceWrapper" c:taskService-ref="minaTaskClient" />
+    <!--<bean id="minaTaskClient" class="org.jbpm.task.service.mina.AsyncMinaTaskClient" />-->
+    <bean id="taskClient" class="org.jbpm.task.service.TaskClient" c:connector-ref="minaTaskClientConnector" />
     
     <bean id="taskClientManager" class="org.wiredwidgets.cow.server.manager.TaskClientManager" init-method="init" >
         <property name="taskClient" ref="taskClient" />

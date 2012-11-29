@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import org.jbpm.task.Group;
 import org.jbpm.task.User;
+import org.jbpm.task.identity.UserGroupCallbackManager;
 import org.jbpm.task.service.TaskService;
 import org.jbpm.task.service.TaskServiceSession;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,9 +69,10 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
             jbpmTaskServiceSession.addGroup(new Group(group));
             groups.add(group);
         }
-
+        
         for (String username : getDefaultUsers()) {
             jbpmTaskServiceSession.addUser(new User(username));
+            
             /*if (username != "Administrator") {
 
                 List<String> groupsForUser = getUserGroups(username);
@@ -101,6 +103,7 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
     }
 
     private void constructUserGroups(){
+        userGroups.put("Administrator", getAllGroups());
         userGroups.put("shawn", getAllGroups());
         userGroups.put("lew", Arrays.asList("SIDO","DOC","DAC"));
         userGroups.put("jon", Arrays.asList("DT","COA"));
@@ -108,19 +111,19 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
         userGroups.put("prema", Arrays.asList("DT","DOC","DAC"));
     }
     
-    private List<String> getUserGroups(String username) {
+    /*private List<String> getUserGroups(String username) {
         if (!username.equals("Administrator")) {
             List<String> groupsForUser = new ArrayList<String>();
             groupsForUser.add("group1");
             //groupsForUser.add("group2");
             return groupsForUser;
-        } /*
+        }
          * else if (username.equals("Administrator")){ List<String> groups = new
          * ArrayList<String>(); groups.add("admin"); return groups;
         }
          */
-        return null;
-    }
+        //return null;
+    //}
 
     private List<String> getAllGroups() {
         List<String> allGroups = new ArrayList<String>();
