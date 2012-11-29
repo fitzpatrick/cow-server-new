@@ -36,12 +36,12 @@ import org.wiredwidgets.cow.server.api.service.HistoryActivities;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.ProcessInstances;
+import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 import org.wiredwidgets.cow.server.service.TaskService;
 import org.wiredwidgets.cow.server.service.ProcessService;
-import org.wiredwidgets.cow.server.api.service.Task;
 
 /**
  *
