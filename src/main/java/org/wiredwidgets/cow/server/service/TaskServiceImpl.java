@@ -140,6 +140,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         // put Outcome into the outputMap 
         // The InputMap contains a variable that tells us what key to use
         if (inputMap.get(DECISION_VAR_NAME) != null) {
+        	log.debug("Decision outcome: " + outcome);
         	outputMap.put((String)inputMap.get(DECISION_VAR_NAME), outcome);
         }        
                
@@ -173,12 +174,13 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         
         //kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), new HashMap<String,Object>());
         BlockingTaskOperationResponseHandler taskResponseHandler = new BlockingTaskOperationResponseHandler();
+        // TODO: since we're passing the variables map further down, maybe we don't need to pass it here?  Test this.
         ContentData contentData = ContentMarshallerHelper.marshal(outputMap, null);      
         taskClient.complete(id, assignee, contentData, taskResponseHandler);
         taskResponseHandler.waitTillDone(1000);
         
-        final Map<String, Object> results = new HashMap<String, Object>();
-        kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), results);
+        // note that we have to pass the variables again.
+        kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), outputMap);
     }
 
     @Transactional(readOnly = true)

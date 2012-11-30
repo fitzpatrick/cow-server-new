@@ -52,12 +52,7 @@ public class GatewayLoopActivityBuilder extends ActivityBuilderImpl<Loop> {
         // ActivityBuilder loopTaskBuilder = createActivityBuilder(source.getLoopTask());
         NodeBuilder loopTaskBuilder = createNodeBuilder(getContext(), source, NodeType.LOOP_TASK);
         loopTaskBuilder.build(this);
-
-        // Use a named transition for the continue path
-        // This name should be used in the UI
-        // NOTE: this MUST go after the build() call
-        loopTaskBuilder.setLinkTransitionName(source.getDoneName());
-   
+  
         activityBuilder.link(loopTaskBuilder);
 
         // following the task we have a diverging gateway
@@ -72,10 +67,14 @@ public class GatewayLoopActivityBuilder extends ActivityBuilderImpl<Loop> {
         loopTaskBuilder.link(divergingGatewayBuilder);
 
         // Link the diverging gateway back to the converging gateway
-        // TODO: figure out how to express named transitions in BPMN20
-        // should be used in the UI
         divergingGatewayBuilder.link(convergingGatewayBuilder, source.getRepeatName());
 
         setLinkSource(divergingGatewayBuilder);
+        
+        // Use a named transition for the continue path
+        // This name should be used in the UI
+        // NOTE: this MUST go after the build() call
+        // loopTaskBuilder.setLinkTransitionName(source.getDoneName());
+        divergingGatewayBuilder.setLinkTransitionName(source.getDoneName());
     }
 }
