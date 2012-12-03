@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.logging.Level;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import static javax.servlet.http.HttpServletResponse.*;
 
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
@@ -29,7 +30,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.wiredwidgets.cow.server.api.service.HistoryActivities;
@@ -73,7 +74,7 @@ public class ProcessInstancesController extends CowServerController{
      * @param response
      * @param req 
      */
-    @RequestMapping(value = "/active", method = RequestMethod.POST, params = "!execute")
+    @RequestMapping(value = "/active", method = POST, params = "!execute")
     public void startExecution(@RequestBody ProcessInstance pi, @RequestParam(value = "init-vars", required = false) boolean initVars, HttpServletResponse response, HttpServletRequest req) {
         log.debug("startExecution: " + pi.getProcessDefinitionKey());
         
@@ -102,7 +103,7 @@ public class ProcessInstancesController extends CowServerController{
         //org.drools.runtime.process.ProcessInstance pi2 = kSession.startProcess(pi.getProcessDefinitionKey(), params);
         
         System.out.println("STARTED PROCESS ID " + id);
-        response.setStatus(HttpServletResponse.SC_CREATED); // 201
+        response.setStatus(SC_CREATED); // 201
         response.setHeader("Location", req.getRequestURL() + "/" + id);
     }
     
@@ -128,7 +129,7 @@ public class ProcessInstancesController extends CowServerController{
      * then the return value will be an ProcessInstances object.  If a single ProcessInstance is requested and it does not exist,
      * a 404 response will be returned.
      */
-    @RequestMapping(value = "/active/{id}.{ext}", method = RequestMethod.GET)
+    @RequestMapping(value = "/active/{id}.{ext}", method = GET)
     @ResponseBody
     public Object getProcessInstance(@PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
         if (ext.equals("*")) {
@@ -137,10 +138,9 @@ public class ProcessInstancesController extends CowServerController{
             pi.getProcessInstances().addAll(processInstanceService.findProcessInstancesByKey(decode(id)));
             return pi;
         } else {
-            //org.wiredwidgets.cow.server.api.service.ProcessInstance instance = processInstanceService.getProcessInstance(id + '.' + ext);
-            org.wiredwidgets.cow.server.api.service.ProcessInstance instance = processInstanceService.getProcessInstance(decode(id),Long.decode(ext));
+            ProcessInstance instance = processInstanceService.getProcessInstance(Long.decode(ext));
             if (instance == null) {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND); // 404
+                response.setStatus(SC_NOT_FOUND); // 404
             }
             return instance;
         }
@@ -162,19 +162,18 @@ public class ProcessInstancesController extends CowServerController{
      * @param ext the process instance number, or "*" to delete all for the key
      * @param response
      */
-    @RequestMapping(value = "/active/{id}.{ext}", method = RequestMethod.DELETE)
+    @RequestMapping(value = "/active/{id}.{ext}", method = DELETE)
     public void deleteProcessInstance(@PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
-        String instanceId = "";
+    	String instanceId = null;
     	id = decode(id);
         if (ext.equals("*")) {
             processInstanceService.deleteProcessInstancesByKey(id);
-            response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
+            response.setStatus(SC_NO_CONTENT); // 204
         } else {
-            instanceId = id + '.' + ext;
-            if (processInstanceService.deleteProcessInstance(instanceId)) {
-                response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
+            if (processInstanceService.deleteProcessInstance(Long.decode(ext))) {
+                response.setStatus(SC_NO_CONTENT); // 204
             } else {
-                response.setStatus(HttpServletResponse.SC_NOT_FOUND); // 404
+                response.setStatus(SC_NOT_FOUND); // 404
             }
         }
         
@@ -234,7 +233,7 @@ public class ProcessInstancesController extends CowServerController{
      * @param ext
      * @param response
      */
-    @RequestMapping(value = "/active/{id}.{ext}", method = RequestMethod.POST)
+    @RequestMapping(value = "/active/{id}.{ext}", method = POST)
     public void updateProcessInstance(@RequestBody org.wiredwidgets.cow.server.api.service.ProcessInstance pi, @PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
         // use ID of the URL
         /*pi.setId(decode(id) + "." + ext);
@@ -256,13 +255,12 @@ public class ProcessInstancesController extends CowServerController{
      * @param response
      * @param req 
      */ 
-    @RequestMapping(value = "/active", method = RequestMethod.POST, params = "execute")
+    @RequestMapping(value = "/active", method = POST, params = "execute")
     public void startExecutionSimple(@RequestParam("execute") String execute, @RequestParam(value="name", required=false) String name, HttpServletResponse response, HttpServletRequest req) {
-        /*org.wiredwidgets.cow.server.api.service.ProcessInstance pi = new org.wiredwidgets.cow.server.api.service.ProcessInstance();
+        org.wiredwidgets.cow.server.api.service.ProcessInstance pi = new org.wiredwidgets.cow.server.api.service.ProcessInstance();
         pi.setProcessDefinitionKey(execute);
         pi.setName(name);
-        startExecution(pi, false, response, req);*/
-        //throw new UnsupportedOperationException("Not supported yet.");
+        startExecution(pi, false, response, req);
     }
     
     /**

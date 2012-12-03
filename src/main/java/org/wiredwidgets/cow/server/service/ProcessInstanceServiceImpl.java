@@ -86,14 +86,15 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Transactional(readOnly = true)
     @Override
-    public ProcessInstance getProcessInstance(String processId, Long processExt) {
-        List<ProcessInstanceLog> processInstances = JPAProcessInstanceDbLog.findActiveProcessInstances(processId);
-        for (ProcessInstanceLog processInstance: processInstances){
-            if (processExt.equals(processInstance.getId())){
-                return this.converter.convert(processInstance, ProcessInstance.class);
-            }
-        }
-        return null;
+    public ProcessInstance getProcessInstance(Long id) {
+//        List<ProcessInstanceLog> processInstances = JPAProcessInstanceDbLog.findActiveProcessInstances(processId);
+//        for (ProcessInstanceLog processInstance: processInstances){
+//            if (processExt.equals(processInstance.getId())){
+//                return this.converter.convert(processInstance, ProcessInstance.class);
+//            }
+//        }
+    	return converter.convert(kSession.getProcessInstance(id), ProcessInstance.class);
+        // return null;
     }
 
     @Transactional(readOnly = true)
@@ -103,14 +104,20 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     }
 
     @Override
-    public boolean deleteProcessInstance(String id) {
-        try {
-            kSession.abortProcessInstance(Long.parseLong(id));
-            return true;
-        } catch (IllegalArgumentException e) {
-            log.error(e);
-        }
-        return false;
+    public boolean deleteProcessInstance(Long id) {
+    	org.drools.runtime.process.ProcessInstance instance = kSession.getProcessInstance(id);
+    	if (instance == null) {
+    		return false;
+    	}
+    	else {
+	        try {
+	            kSession.abortProcessInstance(id);
+	            return true;
+	        } catch (IllegalArgumentException e) {
+	            log.error(e);
+	            return false;
+	        }
+    	}
     }
 
     @Override
@@ -120,7 +127,8 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         for (ProcessInstance proc : procList) {
             if (proc.getKey() != null && proc.getKey().equals(key)) {
                 try {
-                    kSession.abortProcessInstance(Long.parseLong(proc.getId()));
+                	// id uses x.y format
+                    kSession.abortProcessInstance(Long.parseLong(proc.getId().split("\\.")[1]));
                 } catch (IllegalArgumentException e) {
                     log.error(e);
                 }

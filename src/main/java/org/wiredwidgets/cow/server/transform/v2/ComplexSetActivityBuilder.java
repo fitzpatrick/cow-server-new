@@ -38,12 +38,14 @@ public class ComplexSetActivityBuilder extends ActivityBuilderImpl<Activities> {
     @Override
     protected void build() {
 
-        NodeBuilder forkBuilder = this.createNodeBuilder(getContext(), getActivity(), NodeType.DIVERGING_COMPLEX_GATEWAY);
+        // NodeBuilder forkBuilder = this.createNodeBuilder(getContext(), getActivity(), NodeType.DIVERGING_COMPLEX_GATEWAY);
+    	NodeBuilder forkBuilder = this.createNodeBuilder(getContext(), getActivity(), NodeType.DIVERGING_PARALLEL_GATEWAY);
 
         forkBuilder.build(this);
         setLinkTarget(forkBuilder);
 
-        NodeBuilder joinBuilder = this.createNodeBuilder(getContext(), getActivity(), NodeType.CONVERGING_COMPLEX_GATEWAY);
+        // NodeBuilder joinBuilder = this.createNodeBuilder(getContext(), getActivity(), NodeType.CONVERGING_COMPLEX_GATEWAY);
+        NodeBuilder joinBuilder = this.createNodeBuilder(getContext(), getActivity(), NodeType.CONVERGING_EXCLUSIVE_GATEWAY);
         joinBuilder.build(this);
         setLinkSource(joinBuilder);
 

@@ -6,7 +6,9 @@ package org.wiredwidgets.cow.server.convert;
 
 import java.util.Arrays;
 import java.util.Map;
+
 import javax.xml.datatype.XMLGregorianCalendar;
+
 import org.apache.log4j.Logger;
 import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
 import org.jbpm.task.Content;
@@ -59,6 +61,8 @@ public class JbpmTaskToSc2Task extends AbstractConverter implements Converter<or
         }
         
         target.setId(String.valueOf(s.getId()));
+        
+        
         target.setPriority(new Integer(s.getPriority()));
         
         // add task outcomes using the "Options" variable from the task

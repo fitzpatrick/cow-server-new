@@ -125,13 +125,12 @@ public class TasksController {
     public void completeTask(@PathVariable("id") String id, @RequestParam(value = "outcome", required = false) String outcome, @RequestParam(value = "var", required = false) String variables, HttpServletResponse response, HttpServletRequest request) {
         // verify existence
 
-        Task task = taskService.getTask(Long.valueOf(id));
-
+        Task task = taskService.getTask(Long.valueOf(id));       
 
         if (task == null) {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND); // 404
         } else {
-            Map<String, Object> varMap = new HashMap<String, Object>();
+        	Map<String, Object> varMap = new HashMap<String, Object>();
             if (variables != null) {
                 // Note: allowing Spring to create the array has some undesired behaviors in some cases.  For example
                 // if the query string contains a comma, Spring treats it as multi-valued.

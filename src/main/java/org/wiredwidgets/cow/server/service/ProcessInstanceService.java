@@ -15,10 +15,10 @@ import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 public interface ProcessInstanceService {
     /**
      * Find the specified process instance
-     * @param processInstanceId
+     * @param id the process instance ID
      * @return
      */
-    ProcessInstance getProcessInstance(String processId, Long processExt);
+    ProcessInstance getProcessInstance(Long id);
 
     /**
      * Execute the BPM process identified by the processDefinitionKey of the ProcessInstance 
@@ -38,7 +38,7 @@ public interface ProcessInstanceService {
      * Deletes a running process instance by its ID, including any sub-executions
      * @param id
      */
-    boolean deleteProcessInstance(String id);
+    boolean deleteProcessInstance(Long id);
 
     /**
      * Delete all process instances for a key
