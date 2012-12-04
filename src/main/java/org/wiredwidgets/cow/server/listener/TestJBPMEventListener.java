@@ -4,6 +4,7 @@
  */
 package org.wiredwidgets.cow.server.listener;
 
+import org.apache.log4j.Logger;
 import org.drools.event.process.*;
 import org.drools.runtime.StatefulKnowledgeSession;
 import org.jbpm.process.workitem.wsht.*;
@@ -14,10 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author FITZPATRICK
  */
 public class TestJBPMEventListener implements ProcessEventListener{
+	
+	private static Logger log = Logger.getLogger(TestJBPMEventListener.class);
     
     @Override
     public void beforeProcessStarted(ProcessStartedEvent pse) {
-        //System.out.println("WOOOOOOOOOOOOOOOOOO IT STARTED");
+        log.info("Process started: " + pse.getProcessInstance().getId());
     }
 
     @Override
@@ -27,17 +30,17 @@ public class TestJBPMEventListener implements ProcessEventListener{
 
     @Override
     public void beforeProcessCompleted(ProcessCompletedEvent pce) {
-        //throw new UnsupportedOperationException("Not supported yet.");
+    	// log.info("Process complete: " + pce.getProcessInstance().getId());
     }
 
     @Override
     public void afterProcessCompleted(ProcessCompletedEvent pce) {
-        System.out.println(pce.getProcessInstance().getProcessName() + " COMPLETED!");
-        //throw new UnsupportedOperationException("Not supported yet.");
+        log.info(pce.getProcessInstance().getProcessName() + " COMPLETED!");
     }
 
     @Override
     public void beforeNodeTriggered(ProcessNodeTriggeredEvent pnte) {
+    	log.info("Node triggered: " + pnte.getNodeInstance().getNodeName());
         //throw new UnsupportedOperationException("Not supported yet.");
     }
 

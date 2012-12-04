@@ -81,20 +81,15 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
          * updateProcessInstancePriority(instance.getPriority().intValue(), pi);
          * }
          */
-        return Long.toString(pi.getId());
+        
+        // construct a process instance ID in the required format
+        return pi.getProcessId() + "." + Long.toString(pi.getId());
     }
 
     @Transactional(readOnly = true)
     @Override
     public ProcessInstance getProcessInstance(Long id) {
-//        List<ProcessInstanceLog> processInstances = JPAProcessInstanceDbLog.findActiveProcessInstances(processId);
-//        for (ProcessInstanceLog processInstance: processInstances){
-//            if (processExt.equals(processInstance.getId())){
-//                return this.converter.convert(processInstance, ProcessInstance.class);
-//            }
-//        }
-    	return converter.convert(kSession.getProcessInstance(id), ProcessInstance.class);
-        // return null;
+    	return converter.convert(JPAProcessInstanceDbLog.findProcessInstance(id), ProcessInstance.class);
     }
 
     @Transactional(readOnly = true)

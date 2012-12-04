@@ -36,12 +36,6 @@
     <class>org.jbpm.task.OnParentAbortAllSubTasksEndStrategy</class>
     <class>org.jbpm.task.OnAllSubTasksEndParentEndStrategy</class>
     <class>org.jbpm.task.User</class>
-    <properties>
-      <property name="hibernate.max_fetch_depth" value="3"/>
-      <property name="hibernate.show_sql" value="true"/>
-      <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/>
-      <property name="hibernate.connection.autocommit" value="false"/>
-      <property name="hibernate.hbm2ddl.auto" value="update"/>
-    </properties>
+	<!-- see applicationContext.xml for Properties -->
   </persistence-unit>
 </persistence>

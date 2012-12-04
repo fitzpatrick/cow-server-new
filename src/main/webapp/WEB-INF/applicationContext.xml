@@ -70,7 +70,7 @@
                 <!--<bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2HistoryTask" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2HistoryActivity" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2Participation" />-->
-                <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessInstance" />
+				<!-- <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessInstance" /> -->
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmProcessInstanceLogToSc2ProcessInstance" />
                 <!--<bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2HistoryProcessInstance" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessDefinition" />-->
@@ -85,14 +85,10 @@
     </bean>
     
     <bean id="myDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
-        <!--<property name="driverClassName" value="${datasource.driverClassName}" />
+        <property name="driverClassName" value="${datasource.driverClassName}" />
         <property name="url" value="${datasource.url}" />
-        <property name="username" value="${datasource.username}"/>
-        <property name="password" value="${datasource.password}" />-->
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
-        <property name="url" value="jdbc:mysql://localhost/jbpm5" />
-        <property name="username" value="jbpm5"/>
-        <property name="password" value="jbpm5" />
+        <property name="username" value="${datasource.username}" />
+        <property name="password" value="${datasource.password}" />
     </bean>
     
     <bean id="emf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
@@ -100,8 +96,14 @@
         <property name="persistenceUnitName" value="org.drools.persistence.jpa.local"/>
         <property name="jpaProperties">
 	        <props>
-	        	<!-- use "create" to clear out the DB on system startup -->
-<!-- 	        	<prop key="hibernate.hbm2ddl.auto">create</prop> -->
+	        	<!-- Properties can go here instead of in persistence.xml -->
+	        	<prop key="hibernate.show_sql">false</prop>      	
+      			<prop key="hibernate.max_fetch_depth">3</prop>
+      			<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+      			<prop key="hibernate.connection.autocommit">true</prop>
+      			
+      			<!-- use "create" to clear out the DB on system startup -->
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
 	        </props>
         </property>
     </bean>
@@ -173,11 +175,9 @@
                 <jbpm:entity-manager-factory ref="emf"/>
             </jbpm:jpa-persistence>
         </jbpm:configuration>
-    </jbpm:ksession>-->
+    </jbpm:ksession>--> 
     
-    <bean id="workItemHandlerFactory" class="org.wiredwidgets.cow.server.manager.WorkItemHandlerFactory" c:session-ref="kSession" />
-    
-    <bean id="workItemHandler" factory-bean="workItemHandlerFactory" factory-method="createInstance" />
+    <bean id="workItemHandler" class="org.wiredwidgets.cow.server.manager.WorkItemHandlerFactory" factory-method="createInstance" c:session-ref="kSession"  />
   
 <!--     <bean id="kSessionManager" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionManager" init-method="init"> -->
 <!--         <property name="kSession" ref="kSession" /> -->

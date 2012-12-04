@@ -132,7 +132,6 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
 
 	@Override
     public Deployment saveV2Process(Process v2Process, String deploymentName) {
-
        Definitions d = bpmn20ProcessBuilder.build(v2Process);
        log.debug("built bpmn20 process");
        // d.setId(v2Process.getKey());
@@ -206,19 +205,17 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
         addProperty(content, "jcr:mimeType", "application/xml");
         node.getNodes().add(content);
              
-        log.info("calling rem2");
+        log.debug("calling rem2");
         RestTemplate restTemplate = new RestTemplate();
         URI location = restTemplate.postForLocation("http://scout.mitre.org:8080/rem2/cms/workflows", node);
     } 
     
     private InputStream marshalToInputStream(Object source) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        marshaller.marshal(source, new StreamResult(out));
-        
+        marshaller.marshal(source, new StreamResult(out));       
         byte[] bytes = out.toByteArray();
-        String test = new String(bytes);
-        log.info(test);
-   
+        // String test = new String(bytes);
+        // log.info(test);  
         return new ByteArrayInputStream(bytes);
 
     }
