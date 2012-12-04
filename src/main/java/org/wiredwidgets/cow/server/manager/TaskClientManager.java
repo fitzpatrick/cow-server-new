@@ -22,7 +22,7 @@ public class TaskClientManager {
         
     }
     
-    public void settaskClient(TaskClient taskClient){
+    public void setTaskClient(TaskClient taskClient){
         this.taskClient = taskClient;
     }
 }

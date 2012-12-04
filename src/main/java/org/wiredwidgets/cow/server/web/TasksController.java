@@ -58,8 +58,10 @@ public class TasksController {
     TaskService taskService;
     @Autowired
     protected HashMap userGroups;
-    @Autowired
-    protected MinaHTWorkItemHandler minaWorkItemHandler;
+    
+    // @Autowired
+    // protected MinaHTWorkItemHandler minaWorkItemHandler;
+    
     static Logger log = Logger.getLogger(TasksController.class);
 
     /**

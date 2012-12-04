@@ -137,6 +137,7 @@
     </bean>
     
     <!--<bean id="minaTaskClient" class="org.jbpm.task.service.mina.AsyncMinaTaskClient" />-->
+    
     <bean id="taskClient" class="org.jbpm.task.service.TaskClient" c:connector-ref="minaTaskClientConnector" />
     
     <bean id="taskClientManager" class="org.wiredwidgets.cow.server.manager.TaskClientManager" init-method="init" >
@@ -174,13 +175,13 @@
         </jbpm:configuration>
     </jbpm:ksession>-->
     
-    <bean id="minaWorkItemHandler" class="org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler" >
-        <constructor-arg><null/></constructor-arg>
-    </bean>
+    <bean id="workItemHandlerFactory" class="org.wiredwidgets.cow.server.manager.WorkItemHandlerFactory" c:session-ref="kSession" />
     
-    <bean id="kSessionManager" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionManager" init-method="init">
-        <property name="kSession" ref="kSession" />
-    </bean>
+    <bean id="workItemHandler" factory-bean="workItemHandlerFactory" factory-method="createInstance" />
+  
+<!--     <bean id="kSessionManager" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionManager" init-method="init"> -->
+<!--         <property name="kSession" ref="kSession" /> -->
+<!--     </bean> -->
     
     <bean id="testJBPMEventListener" class="org.wiredwidgets.cow.server.listener.TestJBPMEventListener">
         <property name="sessionProcessListener" ref="kSession" />

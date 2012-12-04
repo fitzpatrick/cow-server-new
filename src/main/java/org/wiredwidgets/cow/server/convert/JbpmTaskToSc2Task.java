@@ -32,8 +32,8 @@ public class JbpmTaskToSc2Task extends AbstractConverter implements Converter<or
     @Autowired
     org.jbpm.task.service.TaskClient taskClient;
     
-    @Autowired
-    MinaHTWorkItemHandler minaWorkItemHandler;
+//    @Autowired
+//    MinaHTWorkItemHandler minaWorkItemHandler;
     
     private static Logger log = Logger.getLogger(JbpmTaskSummaryToSc2Task.class);
     

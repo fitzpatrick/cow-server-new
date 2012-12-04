@@ -11,11 +11,10 @@ import java.util.Map;
 
 import org.drools.KnowledgeBase;
 import org.drools.runtime.StatefulKnowledgeSession;
-import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
+import org.jbpm.process.workitem.wsht.GenericHTWorkItemHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.env.Environment;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +46,7 @@ public class AbstractCowServiceImpl {
     protected HashMap<String,List<String>> userGroups;
     
     @Autowired
-    protected MinaHTWorkItemHandler minaWorkItemHandler;
+    protected GenericHTWorkItemHandler workItemHandler;
     
     @Autowired
     protected ArrayList<String> groups;

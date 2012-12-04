@@ -5,21 +5,23 @@
 package org.wiredwidgets.cow.server.manager;
 
 import java.util.Properties;
+
 import javax.persistence.EntityManagerFactory;
+
+import org.apache.log4j.Logger;
 import org.drools.KnowledgeBase;
 import org.drools.KnowledgeBaseFactory;
+import org.drools.marshalling.impl.ProtobufMessages.KnowledgeSession;
 import org.drools.persistence.jpa.JPAKnowledgeService;
 import org.drools.runtime.Environment;
 import org.drools.runtime.EnvironmentName;
 import org.drools.runtime.KnowledgeSessionConfiguration;
 import org.drools.runtime.StatefulKnowledgeSession;
+import org.drools.runtime.process.WorkItemHandler;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
 import org.jbpm.process.audit.JPAWorkingMemoryDbLogger;
-import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.apache.log4j.Logger;
-import org.jbpm.process.workitem.wsht.CommandBasedWSHumanTaskHandler;
 
 /**
  *
@@ -35,13 +37,14 @@ public class KnowledgeSessionFactory {
     @Autowired
     JpaTransactionManager txManager;
     
-    @Autowired
-    MinaHTWorkItemHandler minaWorkItemHandler;
+//    @Autowired
+//    WorkItemHandler workItemHandler;
+    
+    private StatefulKnowledgeSession kSession;
     
     public static Logger log = Logger.getLogger(KnowledgeSessionFactory.class);
     
     public StatefulKnowledgeSession createInstance(){
-        StatefulKnowledgeSession kSession;
         Environment env = KnowledgeBaseFactory.newEnvironment();
         env.set(EnvironmentName.ENTITY_MANAGER_FACTORY, emf);
         env.set(EnvironmentName.TRANSACTION_MANAGER, txManager);
@@ -60,8 +63,8 @@ public class KnowledgeSessionFactory {
         
         new JPAWorkingMemoryDbLogger(kSession);
         JPAProcessInstanceDbLog.setEnvironment(env);
-        minaWorkItemHandler = new MinaHTWorkItemHandler(kSession);
-        kSession.getWorkItemManager().registerWorkItemHandler("Human Task", minaWorkItemHandler);
+        /// minaWorkItemHandler = new MinaHTWorkItemHandler(kSession);
+        // kSession.getWorkItemManager().registerWorkItemHandler("Human Task", workItemHandler);
         
         return kSession;
         /*
@@ -72,5 +75,9 @@ public class KnowledgeSessionFactory {
         Environment env = KnowledgeBaseFactory.newEnvironment();
         env.set(EnvironmentName.ENTITY_MANAGER_FACTORY, emf);
         kSession = JPAKnowledgeService.loadStatefulKnowledgeSession(4, kBase, null, env);*/
+    }
+    
+    public void init() {
+    	// kSession.getWorkItemManager().registerWorkItemHandler("Human Task", workItemHandler);
     }
 }

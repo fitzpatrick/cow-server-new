@@ -22,7 +22,7 @@ import java.util.Map.Entry;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
-import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
+import org.jbpm.process.workitem.wsht.GenericHTWorkItemHandler;
 import org.jbpm.task.Content;
 import org.jbpm.task.service.responsehandlers.BlockingGetContentResponseHandler;
 import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
@@ -44,8 +44,8 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
     @Autowired
     org.jbpm.task.service.TaskClient taskClient;
     
-    @Autowired
-    MinaHTWorkItemHandler minaWorkItemHandler;
+    //@Autowired
+    //GenericHTWorkItemHandler workItemHandler;
     
     private static Logger log = Logger.getLogger(JbpmTaskSummaryToSc2Task.class);
 
