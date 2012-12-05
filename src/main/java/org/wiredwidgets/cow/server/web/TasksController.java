@@ -371,12 +371,9 @@ public class TasksController {
     @RequestMapping(value = "/history", method = RequestMethod.GET, params = "!process")
     @ResponseBody
     public HistoryTasks getHistoryTasks(@RequestParam(value = "assignee", required = false) String assignee, @RequestParam(value = "start", required = false) @DateTimeFormat(iso = ISO.DATE) Date start, @RequestParam(value = "end", required = false) @DateTimeFormat(iso = ISO.DATE) Date end) {
-        /*
-         * HistoryTasks tasks = new HistoryTasks();
-         * tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(assignee,
-         * start, end)); return tasks;
-         */
-        return new HistoryTasks();//throw new UnsupportedOperationException("Not supported yet.");
+         HistoryTasks tasks = new HistoryTasks();
+         tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(assignee, start, end)); 
+         return tasks;
     }
 
     @RequestMapping(value = "/history", method = RequestMethod.GET, params = "process")

@@ -13,7 +13,7 @@
     <properties>
         <org.jbpm.version>5.4.0.Final</org.jbpm.version>
         <!--<copyright.basedir>${basedir}../../..</copyright.basedir>-->
-        <org.springframework.version>3.1.0.RELEASE</org.springframework.version>
+        <org.springframework.version>3.1.2.RELEASE</org.springframework.version>
         <org.drools.version>5.5.0.Final</org.drools.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <netbeans.hint.deploy.server>Tomcat</netbeans.hint.deploy.server>
@@ -89,6 +89,14 @@
             <artifactId>spring-beans</artifactId>
             <version>${org.springframework.version}</version>
         </dependency>
+        
+        <dependency>
+        	<groupId>org.springframework.data</groupId>
+        	<artifactId>spring-data-jpa</artifactId>
+        	<version>1.2.0.RELEASE</version>
+        </dependency>
+        
+        
         
         <dependency>
             <groupId>joda-time</groupId>

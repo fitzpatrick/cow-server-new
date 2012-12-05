@@ -5,9 +5,8 @@
 package org.wiredwidgets.cow.server.service;
 
 import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DecisionUserTaskNodeBuilder.DECISION_VAR_NAME;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME;
 import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.VARIABLES_PROPERTY;
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +18,6 @@ import java.util.Map;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
-import org.drools.marshalling.impl.SerializablePlaceholderResolverStrategy;
 import org.drools.runtime.process.WorkflowProcessInstance;
 import org.jbpm.task.Content;
 import org.jbpm.task.Deadline;
@@ -32,10 +30,14 @@ import org.jbpm.task.TaskData;
 import org.jbpm.task.User;
 import org.jbpm.task.query.TaskSummary;
 import org.jbpm.task.service.ContentData;
-import org.jbpm.task.service.TaskClientHandler.QueryGenericResponseHandler;
-import org.jbpm.task.service.TaskClientHandler.TaskOperationResponseHandler;
-import org.jbpm.task.service.responsehandlers.*;
+import org.jbpm.task.service.responsehandlers.BlockingAddTaskResponseHandler;
+import org.jbpm.task.service.responsehandlers.BlockingGetContentResponseHandler;
+import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
+import org.jbpm.task.service.responsehandlers.BlockingQueryGenericResponseHandler;
+import org.jbpm.task.service.responsehandlers.BlockingTaskOperationResponseHandler;
+import org.jbpm.task.service.responsehandlers.BlockingTaskSummaryResponseHandler;
 import org.jbpm.task.utils.ContentMarshallerHelper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +46,7 @@ import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.Participation;
 import org.wiredwidgets.cow.server.api.service.Task;
+import org.wiredwidgets.cow.server.repo.TaskRepository;
 
 /**
  *
@@ -52,6 +55,9 @@ import org.wiredwidgets.cow.server.api.service.Task;
 @Transactional
 @Component
 public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskService {
+	
+	@Autowired
+	TaskRepository taskRepo;
 	
 	private static Logger log = Logger.getLogger(TaskServiceImpl.class);
 
@@ -111,7 +117,8 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     @Transactional(readOnly = true)
     @Override
     public HistoryTask getHistoryTask(String id) {
-        return new HistoryTask();//throw new UnsupportedOperationException("Not supported yet.");
+    	// TODO: implement or remove this feature
+        return new HistoryTask();
     }
 
     @Override
@@ -181,6 +188,18 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         
         // note that we have to pass the variables again.
         kSession.getWorkItemManager().completeWorkItem(task.getTaskData().getWorkItemId(), outputMap);
+        
+        // update completed date
+        // For some reason this does not get updated by default, and
+        // there appears to be no JBPM API way to do this!
+        org.jbpm.task.Task t = taskRepo.findOne(task.getId());
+        t.getTaskData().setCompletedOn(new Date());
+        // update the user
+        t.getTaskData().setActualOwner(new User(assignee));
+        
+        // note that JPA handles updating of this object automatically
+        
+        
     }
 
     @Transactional(readOnly = true)
@@ -281,26 +300,30 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 
     @Transactional(readOnly = true)
     @Override
-    public List<HistoryTask> getHistoryTasks(String assignee, Date startDate, Date endDate) {
-        return new ArrayList<HistoryTask>();//throw new UnsupportedOperationException("Not supported yet.");
+    public List<HistoryTask> getHistoryTasks(String assignee, Date startDate, Date endDate) {  	
+    	return convertHistoryTasks(taskRepo.findByTaskDataActualOwnerAndTaskDataCompletedOnBetween(
+    			new User(assignee), startDate, endDate));
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<HistoryTask> getHistoryTasks(String processId) {
-        return new ArrayList<HistoryTask>();//throw new UnsupportedOperationException("Not supported yet.");
+        return convertHistoryTasks(taskRepo.findByTaskDataProcessId(processId));
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<HistoryActivity> getHistoryActivities(String processInstanceId) {
-        return new ArrayList<HistoryActivity>();//throw new UnsupportedOperationException("Not supported yet.");
+    	// return convertHistoryTasks(taskRepo.findByTaskDataProcessInstanceId(Long.valueOf(processInstanceId)));
+    	// TODO: implement
+    	return new ArrayList<HistoryActivity>();
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<Task> findOrphanedTasks() {
-        return new ArrayList<Task>();//throw new UnsupportedOperationException("Not supported yet.");
+    	// TODO: implement
+        return new ArrayList<Task>();
     }
 
     @Transactional(readOnly = true)
@@ -327,18 +350,18 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     private List<Task> convertTasks(List<org.jbpm.task.Task> source) {
         return (List<Task>) converter.convert(source, JBPM_TASK_LIST, COW_TASK_LIST);
     }
+  
+	private List<HistoryTask> convertHistoryTasks(List<org.jbpm.task.Task> source) {
+		return (List<HistoryTask>) converter.convert(source, JBPM_TASK_LIST, COW_HISTORY_TASK_LIST);
+	}
 
-    /*
-     * private List<HistoryTask>
-     * convertHistoryTasks(List<org.jbpm.api.history.HistoryTask> source) {
-     * return (List<HistoryTask>) this.converter.convert(source,
-     * JBPM_HISTORY_TASK_LIST, COW_HISTORY_TASK_LIST); }
-     *
-     * private List<HistoryActivity>
-     * convertHistoryActivities(List<org.jbpm.api.history.HistoryActivityInstance>
-     * source) { return (List<HistoryActivity>) this.converter.convert(source,
-     * JBPM_HISTORY_ACTIVITY_LIST, COW_HISTORY_ACTIVITY_LIST); }
-     */
+//     private List<HistoryActivity>
+//     	convertHistoryActivities(List<org.jbpm.api.history.HistoryActivityInstance>
+//     	source) { return (List<HistoryActivity>) this.converter.convert(source,
+//     	JBPM_HISTORY_ACTIVITY_LIST, COW_HISTORY_ACTIVITY_LIST);
+//     }
+     
+    
     //TODO: Check if you can update a task. Can you update task by just adding a task with the same ID?
     private org.jbpm.task.Task createOrUpdateTask(Task source) {
 
