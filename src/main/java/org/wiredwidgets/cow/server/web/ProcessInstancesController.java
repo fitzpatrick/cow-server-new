@@ -277,7 +277,7 @@ public class ProcessInstancesController extends CowServerController{
         /*ProcessInstances pi = new ProcessInstances();
         pi.getProcessInstances().addAll(processInstanceService.findHistoryProcessInstances(key, endedAfter, ended));
         return pi;*/
-        return new ProcessInstances();//throw new UnsupportedOperationException("Not supported yet.");
+        return new ProcessInstances();
     }  
     
     /**
@@ -306,7 +306,6 @@ public class ProcessInstancesController extends CowServerController{
     @ResponseBody
     public ProcessInstances getProcessInstancesWithTasksForAssignee(@RequestParam("assignee") String assignee) {
         return createProcessInstances(mergeTasks(taskService.findPersonalTasks(assignee)));
-        //return null;//throw new UnsupportedOperationException("Not supported yet.");
     }
     
     /**

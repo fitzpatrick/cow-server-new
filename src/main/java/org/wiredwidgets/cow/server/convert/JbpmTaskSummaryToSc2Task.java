@@ -70,8 +70,8 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
         target.setId(String.valueOf(source.getId()));
         target.setName(source.getName());
         target.setPriority(new Integer(source.getPriority()));
-        target.setProcessInstanceId(Long.toString(source.getProcessInstanceId()));
-        
+        target.setProcessInstanceId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
+        target.setActivityName(source.getName());
         BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
         taskClient.getTask(source.getId(), getTaskResponseHandler);        
         org.jbpm.task.Task task = getTaskResponseHandler.getTask();

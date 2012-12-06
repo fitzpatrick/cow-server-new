@@ -62,6 +62,10 @@ public class JbpmTaskToSc2Task extends AbstractConverter implements Converter<or
         
         target.setId(String.valueOf(s.getId()));
         
+        if (s.getNames() != null && !s.getNames().isEmpty()){
+            target.setActivityName(s.getNames().get(0).getText());
+            target.setName(s.getNames().get(0).getText());
+        }
         
         target.setPriority(new Integer(s.getPriority()));
         

@@ -17,33 +17,34 @@ import org.wiredwidgets.cow.server.api.service.HistoryTask;
  * @author FITZPATRICK
  */
 public class JbpmTaskToSc2HistoryTask extends AbstractConverter implements Converter<org.jbpm.task.Task, HistoryTask> {
- 
+
     // private static Logger log = Logger.getLogger(JbpmTaskToSc2HistoryTask.class);
-    
     @Override
     public HistoryTask convert(org.jbpm.task.Task s) {
         HistoryTask target = new HistoryTask();
-
-        if (s == null){
+        
+        if (s == null) {
             return null;
         }
         
-        target.setId(String.valueOf(s.getId()));  
+        target.setId(String.valueOf(s.getId()));        
         
         TaskData td = s.getTaskData();
         if (td != null) {
-        	if (td.getActualOwner() != null) {
-        		target.setAssignee(td.getActualOwner().getId());
-        	}
-	        target.setCreateTime(convert(td.getCreatedOn()));
+            if (td.getActualOwner() != null) {
+                target.setAssignee(td.getActualOwner().getId());
+            }
+            target.setCreateTime(convert(td.getCreatedOn()));
             target.setEndTime(convert(td.getCompletedOn()));
             target.setExecutionId(td.getProcessId() + "." + String.valueOf(td.getProcessInstanceId()));
-        }    
+            target.setState(td.getStatus().name());
+            target.setOutcome("jbpm_no_task_outcome_specified_jbpm");
+            target.setDuration(0);
+        }        
         return target;
     }
-   
-    private XMLGregorianCalendar convert(Date date) {
-    	return getConverter().convert(date, XMLGregorianCalendar.class);
-    }
     
+    private XMLGregorianCalendar convert(Date date) {
+        return getConverter().convert(date, XMLGregorianCalendar.class);
+    }
 }
