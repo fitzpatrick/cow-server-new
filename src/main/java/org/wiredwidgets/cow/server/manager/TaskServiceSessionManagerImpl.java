@@ -105,7 +105,7 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
     private void constructUserGroups(){
         userGroups.put("Administrator", getAllGroups());
         userGroups.put("shawn", getAllGroups());
-        userGroups.put("lew", Arrays.asList("SIDO","DOC","DAC"));
+        userGroups.put("lew", Arrays.asList("SIDO","DOC","DAC","AM"));
         userGroups.put("jon", Arrays.asList("DT","COA"));
         userGroups.put("matt", Arrays.asList("SIDO","COA"));
         userGroups.put("prema", Arrays.asList("DT","DOC","DAC"));
@@ -133,6 +133,7 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
         allGroups.add("DOC");
         allGroups.add("DAC");
         allGroups.add("COA");
+        allGroups.add("AM");
         
         /*
          * groups.add("group2");

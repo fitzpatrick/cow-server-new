@@ -4,23 +4,28 @@
  */
 package org.wiredwidgets.cow.server.service;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
 import org.jbpm.process.audit.JPAWorkingMemoryDbLogger;
 import org.jbpm.process.audit.ProcessInstanceLog;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
+import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Variable;
+import org.wiredwidgets.cow.server.repo.ProcessInstanceLogRepository;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 
 /**
@@ -31,6 +36,9 @@ import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 @Component
 public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implements ProcessInstanceService {
 
+    @Autowired
+	ProcessInstanceLogRepository processInstanceLogRepo;
+    
     public static Logger log = Logger.getLogger(ProcessInstanceServiceImpl.class);
     private static TypeDescriptor JBPM_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.drools.runtime.process.ProcessInstance.class));
     private static TypeDescriptor JBPM_PROCESS_INSTANCE_LOG_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ProcessInstanceLog.class));
@@ -151,17 +159,31 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Override
     public List<ProcessInstance> findAllHistoryProcessInstances() {
-        return new ArrayList<ProcessInstance>();//throw new UnsupportedOperationException("Not supported yet.");
+        return this.convertProcessInstanceLogs(processInstanceLogRepo.findByStatus(2));
     }
 
     @Override
     public List<ProcessInstance> findHistoryProcessInstances(String key, Date endedAfter, boolean ended) {
-        return new ArrayList<ProcessInstance>();//throw new UnsupportedOperationException("Not supported yet.");
+        return this.convertProcessInstanceLogs(findJbpmHistoryProcessInstances(key, endedAfter, ended));
     }
 
     @Override
     public Process getV2Process(String processInstanceId) {
+        /*org.jbpm.api.history.HistoryProcessInstance pi = this.historyService.createHistoryProcessInstanceQuery().processInstanceId(processInstanceId).uniqueResult();
+        String processDefinitionId = pi.getProcessDefinitionId();
+        ProcessDefinition pd = processDefinitionsService.getProcessDefinition(processDefinitionId);
+        InputStream in = processService.getResourceAsStreamByDeploymentId(pd.getDeploymentId(), ProcessService.V2_EXTENSION);
+        if (in != null) {
+            return getV2Process(in);
+        } else {
+            // this will occur if the process is not a cow / v2 process.  I.e. if it is a JPDL loaded directly using the server api.
+            return null;
+        }*/
         return new Process();//throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    private Process getV2Process(InputStream stream) {
+        return (Process) marshaller.unmarshal(new StreamSource(stream));
     }
 
     private List<ProcessInstance> convertProcessInstances(List<org.drools.runtime.process.ProcessInstance> source) {
@@ -184,5 +206,24 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         }
         return this.convertProcessInstanceLogs(activeProcessInstances);
 
+    }
+    
+    private List<ProcessInstanceLog> findJbpmHistoryProcessInstances(String key, Date endedAfter, boolean ended) {
+        List<ProcessInstanceLog> instances = new ArrayList<ProcessInstanceLog>();
+
+        if (key != null) {
+            if (endedAfter != null){
+                instances.addAll(processInstanceLogRepo.findByProcessIdAndStatusAndEndAfter(key, 2, endedAfter));
+            } else{
+                instances.addAll(processInstanceLogRepo.findByProcessIdAndStatus(key, 2));
+            }
+        } else {
+            if (endedAfter != null){
+                instances.addAll(processInstanceLogRepo.findByStatusAndEndAfter(2, endedAfter));
+            } else{
+                instances.addAll(processInstanceLogRepo.findByStatus(2));
+            }
+        }
+        return instances;
     }
 }

@@ -274,10 +274,9 @@ public class ProcessInstancesController extends CowServerController{
     @RequestMapping("/history")
     @ResponseBody
     public ProcessInstances getHistoryProcessInstances(@RequestParam(value = "key", required = false) String key, @RequestParam(value = "endedAfter", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endedAfter, @RequestParam(value = "ended", defaultValue = "true") boolean ended) {
-        /*ProcessInstances pi = new ProcessInstances();
+        ProcessInstances pi = new ProcessInstances();
         pi.getProcessInstances().addAll(processInstanceService.findHistoryProcessInstances(key, endedAfter, ended));
-        return pi;*/
-        return new ProcessInstances();
+        return pi;
     }  
     
     /**

@@ -41,8 +41,10 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverte
         
         // process instance name
         WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(source.getProcessInstanceId());
-        String processName = (String) pi.getVariable(PROCESS_INSTANCE_NAME_PROPERTY);
-        target.setName(processName);
+        if (pi != null){
+            String processName = (String) pi.getVariable(PROCESS_INSTANCE_NAME_PROPERTY);
+            target.setName(processName);
+        }
                      
         return target;
     }
