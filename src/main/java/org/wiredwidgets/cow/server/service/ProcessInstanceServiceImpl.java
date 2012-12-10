@@ -4,29 +4,27 @@
  */
 package org.wiredwidgets.cow.server.service;
 
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.log4j.Logger;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
-import org.jbpm.process.audit.JPAWorkingMemoryDbLogger;
 import org.jbpm.process.audit.ProcessInstanceLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
-import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Variable;
+import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
+import org.wiredwidgets.cow.server.completion.History;
 import org.wiredwidgets.cow.server.repo.ProcessInstanceLogRepository;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
+
 
 /**
  *
@@ -39,6 +37,15 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     @Autowired
 	ProcessInstanceLogRepository processInstanceLogRepo;
     
+    @Autowired
+    ProcessService processService;
+    
+    @Autowired
+    TaskService taskService;
+    
+    @Autowired
+    EvaluatorFactory evaluatorFactory;
+       
     public static Logger log = Logger.getLogger(ProcessInstanceServiceImpl.class);
     private static TypeDescriptor JBPM_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.drools.runtime.process.ProcessInstance.class));
     private static TypeDescriptor JBPM_PROCESS_INSTANCE_LOG_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ProcessInstanceLog.class));
@@ -152,9 +159,16 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         return false;//throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    @Override
-    public Process getProcessInstanceStatus(String processInstanceId) {
-        return new Process();//throw new UnsupportedOperationException("Not supported yet.");
+	@Override
+    public Process getProcessInstanceStatus(Long processInstanceId) {
+		ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(processInstanceId);
+		Process process = processService.getV2Process(pil.getProcessId());
+		evaluatorFactory.getProcessEvaluator(
+				String.valueOf(processInstanceId), process, 
+				new History(taskService.getHistoryActivities(processInstanceId), 
+						pil.getStatus()))
+						.evaluate();
+        return process;
     }
 
     @Override
@@ -166,30 +180,13 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     public List<ProcessInstance> findHistoryProcessInstances(String key, Date endedAfter, boolean ended) {
         return this.convertProcessInstanceLogs(findJbpmHistoryProcessInstances(key, endedAfter, ended));
     }
-
-    @Override
-    public Process getV2Process(String processInstanceId) {
-        /*org.jbpm.api.history.HistoryProcessInstance pi = this.historyService.createHistoryProcessInstanceQuery().processInstanceId(processInstanceId).uniqueResult();
-        String processDefinitionId = pi.getProcessDefinitionId();
-        ProcessDefinition pd = processDefinitionsService.getProcessDefinition(processDefinitionId);
-        InputStream in = processService.getResourceAsStreamByDeploymentId(pd.getDeploymentId(), ProcessService.V2_EXTENSION);
-        if (in != null) {
-            return getV2Process(in);
-        } else {
-            // this will occur if the process is not a cow / v2 process.  I.e. if it is a JPDL loaded directly using the server api.
-            return null;
-        }*/
-        return new Process();//throw new UnsupportedOperationException("Not supported yet.");
-    }
-    
-    private Process getV2Process(InputStream stream) {
-        return (Process) marshaller.unmarshal(new StreamSource(stream));
-    }
-
-    private List<ProcessInstance> convertProcessInstances(List<org.drools.runtime.process.ProcessInstance> source) {
+ 
+    @SuppressWarnings("unchecked")
+	private List<ProcessInstance> convertProcessInstances(List<org.drools.runtime.process.ProcessInstance> source) {
         return (List<ProcessInstance>) converter.convert(source, JBPM_PROCESS_INSTANCE_LIST, COW_PROCESS_INSTANCE_LIST);
     }
-    
+
+    @SuppressWarnings("unchecked")
     private List<ProcessInstance> convertProcessInstanceLogs(List<ProcessInstanceLog> source) {
         return (List<ProcessInstance>) converter.convert(source, JBPM_PROCESS_INSTANCE_LOG_LIST, COW_PROCESS_INSTANCE_LIST);
     }

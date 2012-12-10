@@ -376,15 +376,19 @@ public class TasksController {
          return tasks;
     }
 
+    /**
+     * 
+     * @param process the process instance ID
+     * @return
+     */
     @RequestMapping(value = "/history", method = RequestMethod.GET, params = "process")
     @ResponseBody
-    public HistoryTasks getHistoryTasks(@RequestParam(value = "process", required = true) String process) {
-        /*
-         * HistoryTasks tasks = new HistoryTasks();
-         * tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(process));
-         * return tasks;
-         */
-        return new HistoryTasks();//throw new UnsupportedOperationException("Not supported yet.");
+    public HistoryTasks getHistoryTasks(@RequestParam(value = "process", required = true) String process) {       
+         HistoryTasks tasks = new HistoryTasks();
+         Long processInstanceId = Long.valueOf(process.split("\\.")[1]);
+         tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(processInstanceId);
+         return tasks;
+         
     }
 
 

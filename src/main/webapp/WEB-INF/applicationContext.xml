@@ -61,6 +61,8 @@
     <!-- properties file used to provide values for ${property} expressions -->
     <context:property-placeholder location="classpath:cow-server.properties" />
     
+    <context:component-scan base-package="org.wiredwidgets.cow.server.completion" />
+    
     <!--<bean id="cow" class="org.wiredwidgets.cow.server.api.service.Cow" >
         <property name="version" value="${project.version}" />
     </bean>   -->
@@ -71,11 +73,12 @@
             <util:set>
                 <bean class="org.wiredwidgets.cow.server.convert.DateToXMLGregorianCalendar" />
 				<bean class="org.wiredwidgets.cow.server.convert.JbpmTaskToSc2HistoryTask" />
+				<bean class="org.wiredwidgets.cow.server.convert.JbpmTaskToSc2HistoryActivity" />
 <!--                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2HistoryActivity" /> -->
 				<!-- <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessInstance" /> -->
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmProcessInstanceLogToSc2ProcessInstance" />
-                <!--<bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2HistoryProcessInstance" />
-                <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessDefinition" />-->
+
+<!--                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessDefinition" /> -->
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2Task" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmTaskSummaryToSc2Task" />
                 <bean class="org.wiredwidgets.cow.server.convert.JbpmTaskToSc2Task" />
@@ -267,7 +270,7 @@
             </util:list>
         </property>
     </bean>
-
+    
     <bean id="nodeBuilderFactoryFactory" class="org.wiredwidgets.cow.server.transform.v2.NodeBuilderFactoryFactory">
         <property name="factories">
             <util:set>

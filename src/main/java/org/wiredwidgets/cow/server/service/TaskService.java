@@ -45,7 +45,7 @@ public interface TaskService {
 
     Task getTask(Long id);
 
-    HistoryTask getHistoryTask(String id);
+    // HistoryTask getHistoryTask(String id);
 
     void completeTask(Long id, String assignee, String outcome, Map<String, Object> variables);
 
@@ -89,9 +89,9 @@ public interface TaskService {
 
     void updateTask(Task task);
 
-    List<HistoryTask> getHistoryTasks(String processId);
+    List<HistoryTask> getHistoryTasks(Long processInstanceId);
     
-    List<HistoryActivity> getHistoryActivities(String processInstanceId);
+    List<HistoryActivity> getHistoryActivities(Long processInstanceId);
 
     /**
      * 'Orphaned' tasks include: 

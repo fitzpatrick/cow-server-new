@@ -68,7 +68,7 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
     private static TypeDescriptor COW_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(Task.class));
     //private static TypeDescriptor JBPM_HISTORY_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryTask.class));
     private static TypeDescriptor COW_HISTORY_TASK_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(HistoryTask.class));
-    //private static TypeDescriptor JBPM_HISTORY_ACTIVITY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryActivityInstance.class));
+    // private static TypeDescriptor JBPM_HISTORY_ACTIVITY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryActivityInstance.class));
     private static TypeDescriptor COW_HISTORY_ACTIVITY_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(HistoryActivity.class));
 
     @Transactional(readOnly = true)
@@ -114,12 +114,12 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         return this.converter.convert(task, Task.class);
     }
 
-    @Transactional(readOnly = true)
-    @Override
-    public HistoryTask getHistoryTask(String id) {
-    	// TODO: implement or remove this feature
-        return new HistoryTask();
-    }
+//    @Transactional(readOnly = true)
+//    @Override
+//    public HistoryTask getHistoryTask(Long processInstanceId) {
+//    	// TODO: implement or remove this feature
+//        return new HistoryTask();
+//    }
 
     @Override
     public void completeTask(Long id, String assignee, String outcome, Map<String, Object> variables) {
@@ -307,16 +307,14 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 
     @Transactional(readOnly = true)
     @Override
-    public List<HistoryTask> getHistoryTasks(String processId) {
-        return convertHistoryTasks(taskRepo.findByTaskDataProcessId(processId));
+    public List<HistoryTask> getHistoryTasks(Long processInstanceId) {
+        return convertHistoryTasks(taskRepo.findByTaskDataProcessInstanceId(processInstanceId));
     }
 
     @Transactional(readOnly = true)
     @Override
-    public List<HistoryActivity> getHistoryActivities(String processInstanceId) {
-    	// return convertHistoryTasks(taskRepo.findByTaskDataProcessInstanceId(Long.valueOf(processInstanceId)));
-    	// TODO: implement
-    	return new ArrayList<HistoryActivity>();
+    public List<HistoryActivity> getHistoryActivities(Long processInstanceId) {
+    	return convertHistoryActivities(taskRepo.findByTaskDataProcessInstanceId(processInstanceId));
     }
 
     @Transactional(readOnly = true)
@@ -343,23 +341,25 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
      * return (List<Participation>) converter.convert(source,
      * JBPM_PARTICIPATION_LIST, COW_PARTICIPATION_LIST); }
      */
-    private List<Task> convertTaskSummarys(List<org.jbpm.task.query.TaskSummary> source) {
+    @SuppressWarnings("unchecked")
+	private List<Task> convertTaskSummarys(List<org.jbpm.task.query.TaskSummary> source) {
         return (List<Task>) converter.convert(source, JBPM_TASK_SUMMARY_LIST, COW_TASK_LIST);
     }
     
+    @SuppressWarnings("unchecked")
     private List<Task> convertTasks(List<org.jbpm.task.Task> source) {
         return (List<Task>) converter.convert(source, JBPM_TASK_LIST, COW_TASK_LIST);
     }
   
+    @SuppressWarnings("unchecked")
 	private List<HistoryTask> convertHistoryTasks(List<org.jbpm.task.Task> source) {
 		return (List<HistoryTask>) converter.convert(source, JBPM_TASK_LIST, COW_HISTORY_TASK_LIST);
 	}
 
-//     private List<HistoryActivity>
-//     	convertHistoryActivities(List<org.jbpm.api.history.HistoryActivityInstance>
-//     	source) { return (List<HistoryActivity>) this.converter.convert(source,
-//     	JBPM_HISTORY_ACTIVITY_LIST, COW_HISTORY_ACTIVITY_LIST);
-//     }
+    @SuppressWarnings("unchecked")
+    private List<HistoryActivity> convertHistoryActivities(List<org.jbpm.task.Task> source) { 
+    	return (List<HistoryActivity>) converter.convert(source, JBPM_TASK_LIST, COW_HISTORY_ACTIVITY_LIST);
+    }
      
     
     //TODO: Check if you can update a task. Can you update task by just adding a task with the same ID?

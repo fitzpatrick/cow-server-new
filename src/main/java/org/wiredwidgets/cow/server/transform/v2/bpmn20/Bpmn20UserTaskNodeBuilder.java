@@ -62,10 +62,9 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
 
         Task source = getActivity();
         TUserTask t = getNode();
-        t.setId(getContext().generateId("_")); // JBPM ID naming convention uses underscore prefix + sequence 
-             
-        source.setKey(t.getName());
+        t.setId(getContext().generateId("_")); // JBPM ID naming convention uses underscore prefix + sequence                
         t.setName(source.getName());
+        source.setKey(t.getId());
            
         t.setIoSpecification(ioSpec);     
         ioSpec.getInputSets().add(inputSet);       
@@ -79,8 +78,11 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         addDataInput("ProcessInstanceName", processNameProperty);
         addDataInput("Comment", source.getDescription());
         addDataInput("Skippable", "false");
-        addDataInput("TaskName", source.getName());
         
+        // prepend the id to the name so we can map back to the key
+        // when converting the task we will split it apart for display
+        addDataInput("TaskName", t.getId() + "/" + source.getName());
+
         if (source.getCandidateGroups() != null) {
         	addDataInput("GroupId", source.getCandidateGroups());
         }   

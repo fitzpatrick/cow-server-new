@@ -68,10 +68,13 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter implements Conve
             target.setDueDate(this.getConverter().convert(source.getExpirationTime(), XMLGregorianCalendar.class));
         }
         target.setId(String.valueOf(source.getId()));
-        target.setName(source.getName());
+        String[] parts = source.getName().split("/");
+        target.setActivityName(parts[0]);
+        target.setName(parts[1]);
+        
         target.setPriority(new Integer(source.getPriority()));
         target.setProcessInstanceId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
-        target.setActivityName(source.getName());
+        
         BlockingGetTaskResponseHandler getTaskResponseHandler = new BlockingGetTaskResponseHandler();
         taskClient.getTask(source.getId(), getTaskResponseHandler);        
         org.jbpm.task.Task task = getTaskResponseHandler.getTask();

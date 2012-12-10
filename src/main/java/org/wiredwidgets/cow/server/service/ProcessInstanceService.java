@@ -7,6 +7,7 @@ package org.wiredwidgets.cow.server.service;
 import java.util.Date;
 import java.util.List;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 
 /**
  *
@@ -66,12 +67,13 @@ public interface ProcessInstanceService {
      * @param processInstanceId the process instance ID of the running process.
      * @return a Process object corresponding to the process Instance, with its completion attributes 
      * set according to the current state of the process instance.
+     * 	
      */
-    org.wiredwidgets.cow.server.api.model.v2.Process getProcessInstanceStatus(String processInstanceId);
-
+    Process getProcessInstanceStatus(Long processInstanceId);
+    
     List<ProcessInstance> findAllHistoryProcessInstances();
 
     List<ProcessInstance> findHistoryProcessInstances(String key, Date endedAfter, boolean ended);
 
-    org.wiredwidgets.cow.server.api.model.v2.Process getV2Process(String processInstanceId);
+
 }

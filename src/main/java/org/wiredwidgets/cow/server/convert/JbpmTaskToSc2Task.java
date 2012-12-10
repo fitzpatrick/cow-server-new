@@ -63,8 +63,10 @@ public class JbpmTaskToSc2Task extends AbstractConverter implements Converter<or
         target.setId(String.valueOf(s.getId()));
         
         if (s.getNames() != null && !s.getNames().isEmpty()){
-            target.setActivityName(s.getNames().get(0).getText());
-            target.setName(s.getNames().get(0).getText());
+        	// see Bpmn20UserTaskNodeBuilder
+        	String[] parts = s.getNames().get(0).getText().split("/");
+            target.setActivityName(parts[0]); // corresponds to "key" in workflow
+            target.setName(parts[1]); // used for display to the user
         }
         
         target.setPriority(new Integer(s.getPriority()));
