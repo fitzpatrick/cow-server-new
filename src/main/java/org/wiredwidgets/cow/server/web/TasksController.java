@@ -386,7 +386,7 @@ public class TasksController {
     public HistoryTasks getHistoryTasks(@RequestParam(value = "process", required = true) String process) {       
          HistoryTasks tasks = new HistoryTasks();
          Long processInstanceId = Long.valueOf(process.split("\\.")[1]);
-         tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(processInstanceId);
+         tasks.getHistoryTasks().addAll(taskService.getHistoryTasks(processInstanceId));
          return tasks;
          
     }
