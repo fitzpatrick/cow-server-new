@@ -208,7 +208,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     private List<ProcessInstanceLog> findJbpmHistoryProcessInstances(String key, Date endedAfter, boolean ended) {
         List<ProcessInstanceLog> instances = new ArrayList<ProcessInstanceLog>();
 
-        if (key != null) {
+        if(key != null  && !key.trim().equals("")){
             if (endedAfter != null){
                 instances.addAll(processInstanceLogRepo.findByProcessIdAndStatusAndEndAfter(key, 2, endedAfter));
             } else{
@@ -218,7 +218,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
             if (endedAfter != null){
                 instances.addAll(processInstanceLogRepo.findByStatusAndEndAfter(2, endedAfter));
             } else{
-                instances.addAll(processInstanceLogRepo.findByStatus(2));
+                instances.addAll(processInstanceLogRepo.findByStatus(2));                
             }
         }
         return instances;
