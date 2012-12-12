@@ -27,24 +27,20 @@ import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 public class History {
 	
 	private Map<String, List<HistoryActivity>> activitiesMap = new HashMap<String, List<HistoryActivity>>();
-        private int processIntanceState;
-        
-        /**
-         * Constructor
-         * @param activities 
-         */
-        public History(List<HistoryActivity> activities) {
-            this(activities, ProcessInstance.STATE_ACTIVE);
-        }
+
+	private int processIntanceState;
 	
-        /**
-         * Constructor
-         * @param activities
-         * @param processState 
-         */
-	public History(List<HistoryActivity> activities, int processState) {
+	private String exitState;
+        
+    /**
+     * Constructor
+     * @param activities
+     * @param processState 
+     */
+	public History(List<HistoryActivity> activities, int processState, String exitState) {
 		setActivities(activities);
-                this.processIntanceState = processState;
+        this.processIntanceState = processState;
+        this.exitState = exitState;
 	}
 	
 	/**
@@ -76,6 +72,10 @@ public class History {
 
     public int getProcessInstanceState() {
         return processIntanceState;
+    }
+    
+    public String getExitState() {
+    	return exitState;
     }
 
 }

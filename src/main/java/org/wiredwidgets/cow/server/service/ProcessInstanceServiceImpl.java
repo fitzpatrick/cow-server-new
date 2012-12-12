@@ -13,6 +13,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
 import org.jbpm.process.audit.ProcessInstanceLog;
+import org.jbpm.process.audit.VariableInstanceLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -24,6 +25,7 @@ import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
 import org.wiredwidgets.cow.server.completion.History;
 import org.wiredwidgets.cow.server.repo.ProcessInstanceLogRepository;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY;
 
 
 /**
@@ -161,12 +163,13 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 	@Override
     public Process getProcessInstanceStatus(Long processInstanceId) {
 		ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(processInstanceId);
+		String exitValue = getProcessInstanceVariable(processInstanceId, PROCESS_EXIT_PROPERTY);
 		Process process = processService.getV2Process(pil.getProcessId());
 		evaluatorFactory.getProcessEvaluator(
-				String.valueOf(processInstanceId), process, 
-				new History(taskService.getHistoryActivities(processInstanceId), 
-						pil.getStatus()))
-						.evaluate();
+				String.valueOf(processInstanceId), 
+				process, 
+				new History(taskService.getHistoryActivities(processInstanceId), pil.getStatus(), exitValue))
+				.evaluate();
         return process;
     }
 
@@ -222,4 +225,14 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         }
         return instances;
     }
+    
+    private String getProcessInstanceVariable(Long id, String name) {
+        List<VariableInstanceLog> vars = JPAProcessInstanceDbLog.findVariableInstances(id, name);
+        String value = null;       
+        if (vars != null && vars.size() > 0 ){
+            value = vars.get(0).getValue();
+        }    	
+        return value;
+    }
+    
 }

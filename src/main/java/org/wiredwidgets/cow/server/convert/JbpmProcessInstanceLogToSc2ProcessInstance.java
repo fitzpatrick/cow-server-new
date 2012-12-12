@@ -4,17 +4,24 @@
  */
 package org.wiredwidgets.cow.server.convert;
 
+import static org.drools.runtime.process.ProcessInstance.STATE_ABORTED;
+import static org.drools.runtime.process.ProcessInstance.STATE_ACTIVE;
+import static org.drools.runtime.process.ProcessInstance.STATE_COMPLETED;
+import static org.drools.runtime.process.ProcessInstance.STATE_PENDING;
+import static org.drools.runtime.process.ProcessInstance.STATE_SUSPENDED;
 import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY;
+
+import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.drools.runtime.StatefulKnowledgeSession;
-import org.drools.runtime.process.WorkflowProcessInstance;
+import org.jbpm.process.audit.JPAProcessInstanceDbLog;
 import org.jbpm.process.audit.ProcessInstanceLog;
+import org.jbpm.process.audit.VariableInstanceLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
-import static org.drools.runtime.process.ProcessInstance.*;
 
 /**
  *
@@ -56,13 +63,19 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverte
         }
         
         // process instance name
-        WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(source.getProcessInstanceId());
-        if (pi != null){
-            String processName = (String) pi.getVariable(PROCESS_INSTANCE_NAME_PROPERTY);
-            target.setName(processName);
-        }
-                     
+        // WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(source.getProcessInstanceId());
+        target.setName(getVariable(source.getId(), PROCESS_INSTANCE_NAME_PROPERTY));
+                            
         return target;
+    }
+    
+    private String getVariable(Long id, String name) {
+        List<VariableInstanceLog> vars = JPAProcessInstanceDbLog.findVariableInstances(id, name);
+        String value = null;       
+        if (vars != null && vars.size() > 0 ){
+            value = vars.get(0).getValue();
+        }    	
+        return value;
     }
     
 }

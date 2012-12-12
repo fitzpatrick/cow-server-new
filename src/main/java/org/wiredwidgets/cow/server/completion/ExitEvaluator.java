@@ -17,6 +17,7 @@
 package org.wiredwidgets.cow.server.completion;
 
 
+import org.drools.runtime.process.ProcessInstance;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Exit;
 
@@ -25,13 +26,16 @@ public class ExitEvaluator extends AbstractEvaluator<Exit> {
     
     @Override
     protected void evaluateInternal() {
-        // if (history.getProcessInstanceState().equals(this.activity.getState())) {
-    	// TODO: implement this somehow
-    	if (false) {
+
+    	if (history.getProcessInstanceState() == ProcessInstance.STATE_COMPLETED 
+    			&& history.getExitState() != null 
+    			&& history.getExitState().equals(activity.getState() )) {
+    		
             this.completionState = CompletionState.COMPLETED;
         }
         else {
             this.completionState = CompletionState.NOT_STARTED;
         }
     }
+     
 }
