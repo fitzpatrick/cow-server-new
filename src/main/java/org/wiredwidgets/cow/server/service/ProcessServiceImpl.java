@@ -22,6 +22,7 @@ import org.drools.builder.KnowledgeBuilderFactory;
 import org.drools.builder.ResourceType;
 import org.drools.io.Resource;
 import org.drools.io.ResourceFactory;
+import org.jbpm.process.instance.ProcessInstance;
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,7 +31,6 @@ import org.springframework.web.client.RestTemplate;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.service.Deployment;
 import org.wiredwidgets.cow.server.api.service.ProcessDefinition;
-import org.wiredwidgets.cow.server.api.service.ProcessDefinitions;
 import org.wiredwidgets.cow.server.api.service.ResourceNames;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 import org.wiredwidgets.rem2.schema.Node;
@@ -55,12 +55,6 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     @Autowired
     ProcessDefinitionsService processDefsService;
     
-    @Transactional(readOnly = true)
-    @Override
-    public StreamSource getResource(String id, String name) {
-        return new StreamSource();//throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     @Override
     public void deleteDeployment(String id) {
         kBase.removeProcess(id);
@@ -97,45 +91,22 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     @Override
     public Deployment getDeployment(String id) {
         org.drools.definition.process.Process p = kBase.getProcess(id);
-
         Deployment d = new Deployment();
         d.setId(p.getId());
         d.setName(p.getName());
-
         return d;
     }
 
     @Override
     public Deployment createDeployment(Definitions definitions, String name) {
-
-        try {
-//            SAXParserFactory spf = SAXParserFactory.newInstance();
-//            SAXParser sp = spf.newSAXParser();
-//            XMLReader xr = sp.getXMLReader();
-//
-//            BPMN2SaxParser bpmnParser = new BPMN2SaxParser();
-//
-//            byte[] input = IOUtils.toByteArray(source.getInputStream());
-//            ByteArrayInputStream ba = new ByteArrayInputStream(input);
-//            sp.parse(ba, bpmnParser);
-       	
-            KnowledgeBuilder kBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
-            kBuilder.add(ResourceFactory.newInputStreamResource(marshalToInputStream(definitions)), ResourceType.BPMN2);
-            kBase.addKnowledgePackages(kBuilder.getKnowledgePackages());
-            return createDeployment(definitions);
-        } catch (Exception e) {
-            log.error(e);
-        }
-
-        return null;
+    	loadWorkflow(definitions);
+    	return createDeployment(definitions);
     }
 
 	@Override
     public Deployment saveV2Process(Process v2Process, String deploymentName) {
        Definitions d = bpmn20ProcessBuilder.build(v2Process);
        log.debug("built bpmn20 process");
-       // d.setId(v2Process.getKey());
-       // resources.put(BPMN2_EXTENSION, marshalToInputStream(d));
        saveInRem2(v2Process);
        return createDeployment(d, deploymentName);
     }
@@ -146,7 +117,6 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     	return getProcessFromRem2(key).getInputStream();
     }
     
-   
     @Transactional(readOnly = true)
     @Override
     public InputStream getResourceAsStreamByDeploymentId(String id, String extension) {
@@ -171,10 +141,7 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     	for (ProcessDefinition def : defs) {
     		log.info("Loading process: " + def.getKey());
     		Definitions d = getBpmn20Process(def.getKey());
-            KnowledgeBuilder kBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();	
-            Resource resource = ResourceFactory.newInputStreamResource(marshalToInputStream(d));
-            kBuilder.add(resource, ResourceType.BPMN2);
-            kBase.addKnowledgePackages(kBuilder.getKnowledgePackages());    		
+    		loadWorkflow(d);		
     	}
     }
     
@@ -212,12 +179,17 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     
     private InputStream marshalToInputStream(Object source) {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        marshaller.marshal(source, new StreamResult(out));       
+        try {
+        	marshaller.marshal(source, new StreamResult(out));  
+        }
+        catch (Exception e) {
+        	log.error("Marshalling exception for object " + source.getClass().getName());
+        	log.error(e);
+        	e.printStackTrace();
+        	throw new RuntimeException(e);
+        }
         byte[] bytes = out.toByteArray();
-        // String test = new String(bytes);
-        // log.info(test);  
         return new ByteArrayInputStream(bytes);
-
     }
     
     private StreamSource getProcessFromRem2(String processName) {
@@ -226,12 +198,32 @@ public class ProcessServiceImpl extends AbstractCowServiceImpl implements Proces
     }
     
     private Deployment createDeployment(Definitions definitions) {
-    	Deployment d = new Deployment();
-        
+    	Deployment d = new Deployment();      
     	d.setId(definitions.getRootElements().get(0).getValue().getId());
     	d.setName(definitions.getName());
     	d.setState("active");
     	return d;
+    }
+    
+    private void loadWorkflow(Definitions defs) {
+    	try {
+    		log.info("Loading process into knowledge base: " + defs.getName());
+	        KnowledgeBuilder kBuilder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+	        InputStream stream = marshalToInputStream(defs);
+	        Resource resource = ResourceFactory.newInputStreamResource(stream);
+	        kBuilder.add(resource, ResourceType.BPMN2);
+	        kBase.addKnowledgePackages(kBuilder.getKnowledgePackages()); 
+	        
+	        // test
+	        // org.drools.runtime.process.ProcessInstance pi = kSession.startProcess(defs.getName());
+	        // kSession.abortProcessInstance(pi.getId());
+	            
+	        
+    	}
+    	catch  (Exception e) {
+    		log.error("Error loading process: " + defs.getName());
+    		log.error(e);
+    	}
     }
    
   

@@ -46,8 +46,6 @@ public interface ProcessService {
      */
     public Deployment createDeployment(Definitions definitions, String name);
 
-    StreamSource getResource(String id, String name);
-
     void deleteDeployment(String id);
 
     List<Deployment> findAllDeployments() throws Exception;

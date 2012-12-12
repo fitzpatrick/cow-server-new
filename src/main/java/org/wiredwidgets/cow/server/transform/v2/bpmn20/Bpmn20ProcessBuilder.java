@@ -21,14 +21,19 @@
 
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
+import javax.xml.bind.JAXBElement;
 import javax.xml.namespace.QName;
 
 import org.omg.spec.bpmn._20100524.model.Definitions;
 import org.omg.spec.bpmn._20100524.model.ObjectFactory;
+import org.omg.spec.bpmn._20100524.model.TGatewayDirection;
 import org.omg.spec.bpmn._20100524.model.TProcess;
 import org.omg.spec.bpmn._20100524.model.TProcessType;
 import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Exit;
+import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.api.model.v2.Variable;
 import org.wiredwidgets.cow.server.transform.v2.AbstractProcessBuilder;
 import org.wiredwidgets.cow.server.transform.v2.Builder;
@@ -43,13 +48,14 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
 	
 	public static final String VARIABLES_PROPERTY = "variables";
 	public static final String PROCESS_INSTANCE_NAME_PROPERTY = "processInstanceName";
+	public static final String PROCESS_EXIT_PROPERTY = "processExitState";
     
     private static ObjectFactory factory = new ObjectFactory();
     
     private static final String DEFINITIONS_ID = "Definitions"; // unclear whether this has a any meaning
 
     @Override
-    public Definitions build(org.wiredwidgets.cow.server.api.model.v2.Process source) {
+    public Definitions build(Process source) {
         
         Definitions definitions = new Definitions();
         definitions.setName(source.getName());
@@ -74,6 +80,9 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
         
         // Name for the process instance
         context.addProcessVariable(PROCESS_INSTANCE_NAME_PROPERTY, "String");
+        
+        // Used with Exit actions to specify which action was taken
+        context.addProcessVariable(PROCESS_EXIT_PROPERTY, "String");
              
         // Add any additional variables defined in the workflow
         if (source.getVariables() != null) {
@@ -84,21 +93,64 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
         
         // TODO: initialize the process variables from values specified in the master workflow
 
+        // create the start node
         Builder startBuilder = new Bpmn20StartNodeBuilder(context);
         startBuilder.build(null);
+        
+        boolean hasExit = containsExit(source.getActivity().getValue());
+        
+        Builder gatewayBuilder = null;
+        
+        if (hasExit) {
+	        // end the process with a converging gateway linked to an end node
+	        // this allows multiple paths to the end node from other "Exit" points
+	        gatewayBuilder = new Bpmn20ExclusiveGatewayNodeBuilder(context, TGatewayDirection.CONVERGING);
+	        gatewayBuilder.build(null);
+	        // context.setProcessExitBuilder(gatewayBuilder); 
+	        
+	        Builder signalEventBuilder = new Bpmn20SignalEventNodeBuilder(context, source.getActivity().getValue());
+	        signalEventBuilder.build(null);
+	        signalEventBuilder.link(gatewayBuilder);           
+        }
 
+        // build the main activity
         Activity activity = source.getActivity().getValue();
-        Builder builder = createActivityBuilder(context, activity);
-
+        Builder builder = createActivityBuilder(context, activity);        
         builder.build(null);
+        
+        // link start node to the main activity
         startBuilder.link(builder);
-
+        
+        // build the end node
         Builder endBuilder = new Bpmn20EndNodeBuilder(context);
-        endBuilder.build(null);
-
-        builder.link(endBuilder);
-
+        endBuilder.build(null);  
+        
+        if (hasExit) {
+        	// link the main activity to the gateway
+        	builder.link(gatewayBuilder);
+        	gatewayBuilder.link(endBuilder);
+        }
+        else {
+        	// link the main activity directly to the end node
+        	builder.link(endBuilder);
+        }
+        
         return definitions;
+    }
+    
+    private boolean containsExit(Activity activity) {
+    	if (activity instanceof Exit) {
+    		return true;
+    	}
+    	else if (activity instanceof Activities) {
+			for (JAXBElement<? extends Activity> element : ((Activities)activity).getActivities()) {
+				if (containsExit(element.getValue())) {
+					return true;
+				}
+			}
+			return false;
+    	}
+    	return false;
     }
     
 }

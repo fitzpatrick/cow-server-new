@@ -22,31 +22,38 @@
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
 import javax.xml.bind.JAXBElement;
-import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
-import org.omg.spec.bpmn._20100524.model.TEndEvent;
-import org.omg.spec.bpmn._20100524.model.TTerminateEventDefinition;
+
+import org.omg.spec.bpmn._20100524.model.Script;
+import org.omg.spec.bpmn._20100524.model.TScriptTask;
 import org.wiredwidgets.cow.server.api.model.v2.Exit;
+import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
 /**
  * Node builder for TEndEvent
  * @author JKRANES
  */
-public class Bpmn20ExitNodeBuilder extends Bpmn20FlowNodeBuilder<TEndEvent, Exit> {
+public class Bpmn20ExitNodeBuilder extends Bpmn20FlowNodeBuilder<TScriptTask, Exit> {
 
     public Bpmn20ExitNodeBuilder(ProcessContext context, Exit exit) {
-        super(context, new TEndEvent(), exit);
+        super(context, new TScriptTask(), exit);
     }
 
     @Override
-    protected JAXBElement<TEndEvent> createNode() {
-        return factory.createEndEvent(getNode());
+    protected JAXBElement<TScriptTask> createNode() {
+        return factory.createScriptTask(getNode());
     }
 
     @Override
     protected void buildInternal() {
-        getNode().setId(getContext().generateId("_"));
-        getNode().setName("end");
-        getNode().getEventDefinitions().add(factory.createTerminateEventDefinition(new TTerminateEventDefinition()));
+         getNode().setId(getContext().generateId("_"));
+         getNode().setName("exit " + getActivity().getState());
+         
+         Script script = new Script();         
+         String scriptText = "kcontext.getKnowledgeRuntime().signalEvent(\"exit\", \"" 
+        		 + getActivity().getState() + "\", kcontext.getProcessInstance().getId());";   
+         script.getContent().add(scriptText);
+         getNode().setScript(script);
     }
-
+    
+   
 }

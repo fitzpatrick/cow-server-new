@@ -150,7 +150,6 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     @Override
     public List<ProcessInstance> findProcessInstancesByKey(String key) {
         List<ProcessInstanceLog> processInstances = JPAProcessInstanceDbLog.findActiveProcessInstances(key);
-
         return this.convertProcessInstanceLogs(processInstances);
     }
 

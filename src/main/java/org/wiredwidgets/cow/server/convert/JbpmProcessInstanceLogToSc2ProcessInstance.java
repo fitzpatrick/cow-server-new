@@ -4,10 +4,7 @@
  */
 package org.wiredwidgets.cow.server.convert;
 
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.VARIABLES_PROPERTY;
 import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_INSTANCE_NAME_PROPERTY;
-
-import java.util.Map;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -17,6 +14,7 @@ import org.jbpm.process.audit.ProcessInstanceLog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.converter.Converter;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
+import static org.drools.runtime.process.ProcessInstance.*;
 
 /**
  *
@@ -38,6 +36,24 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverte
         target.setId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
         target.setStartTime(this.getConverter().convert(source.getStart(), XMLGregorianCalendar.class));
         target.setEndTime(this.getConverter().convert(source.getEnd(), XMLGregorianCalendar.class));
+        
+        switch (source.getStatus()) {
+        	case STATE_ABORTED :
+        		target.setState("aborted");
+        		break;
+        	case STATE_ACTIVE :
+        		target.setState("active");
+        		break;
+        	case STATE_COMPLETED :
+        		target.setState("completed");
+        		break;
+        	case STATE_PENDING :
+        		target.setState("pending");
+        		break;
+        	case STATE_SUSPENDED :
+        		target.setState("suspended");
+        		break;
+        }
         
         // process instance name
         WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(source.getProcessInstanceId());

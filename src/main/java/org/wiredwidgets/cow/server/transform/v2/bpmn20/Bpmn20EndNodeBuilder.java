@@ -46,6 +46,13 @@ public class Bpmn20EndNodeBuilder extends Bpmn20FlowNodeBuilder<TEndEvent, Activ
     protected void buildInternal() {
         getNode().setId(getContext().generateId("_"));
         getNode().setName("end");
+        
+        // NOTE: See JBPM documentation for the distinction between Terminating and
+        // non terminating end events.  Terminating end events will also terminate
+        // any parent process if this process is being called as a sub-process.  In order
+        // to avoid this, we make the end event non terminating, and we precede it with
+        // a converging exclusive gateway, so that all exit paths lead to the same point.
+        
         getNode().getEventDefinitions().add(factory.createTerminateEventDefinition(new TTerminateEventDefinition()));
     }
 

@@ -25,6 +25,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.bind.JAXBElement;
+
+import org.wiredwidgets.cow.server.api.model.v2.Activities;
+import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Exit;
+
 
 /**
  * Abstract implementation to handle some common functions used by Builder subclasses
@@ -147,6 +153,62 @@ public abstract class AbstractBuilder implements Builder {
     @Override
     public void setBuildProperty(String key, Object value) {
         buildProperties.put(key, value);
+    }
+    
+    protected boolean containsExit(Activity activity) {
+    	if (activity instanceof Exit) {
+    		return true;
+    	}
+    	else if (activity instanceof Activities) {
+			for (JAXBElement<? extends Activity> element : ((Activities)activity).getActivities()) {
+				if (containsExit(element.getValue())) {
+					return true;
+				}
+			}
+			return false;
+    	}
+    	return false;
+    }  
+    
+    protected boolean containsNonExit(Activity activity) {
+    	if (activity instanceof Exit) {
+    		return false;
+    	}
+    	else if (activity instanceof Activities && ((Activities)activity).getActivities().size() > 0) {
+    		// at least one must be a non exit
+    		
+    		Activities activities = (Activities)activity;
+    		
+    		if (activities.isSequential()) {
+    			// NONE can be an Exit
+				for (JAXBElement<? extends Activity> element : ((Activities)activity).getActivities()) {
+					if (!containsNonExit(element.getValue())) {
+						return false;
+					}
+				}  
+				return true;
+    		}
+    		else {
+	    		// AT LEAST ONE must be a non exit
+				for (JAXBElement<? extends Activity> element : ((Activities)activity).getActivities()) {
+					if (containsNonExit(element.getValue())) {
+						return true;
+					}
+				}
+				return false;
+    		}
+    	}
+    	return true;    	
+    }
+    
+    protected int countNonExitPaths(List<JAXBElement<? extends Activity>> activities) {
+    	int count = 0;
+        for (JAXBElement<? extends Activity> element : activities) {
+            if (containsNonExit(element.getValue())) {
+            	count++;
+            }
+        }
+        return count;
     }
     
     

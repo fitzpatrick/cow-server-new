@@ -36,6 +36,7 @@ import org.omg.spec.dd._20100524.dc.Bounds;
 import org.omg.spec.dd._20100524.dc.Point;
 import org.wiredwidgets.cow.server.api.model.v2.Process;
 import org.wiredwidgets.cow.server.transform.v2.AbstractProcessContext;
+import org.wiredwidgets.cow.server.transform.v2.Builder;
 
 
 /**
@@ -53,6 +54,10 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<JAXBElement<TFl
     private static org.omg.spec.bpmn._20100524.di.ObjectFactory diFactory = new org.omg.spec.bpmn._20100524.di.ObjectFactory();
     private static org.omg.spec.bpmn._20100524.model.ObjectFactory modelFactory = new org.omg.spec.bpmn._20100524.model.ObjectFactory();
     private Map<String, Property> properties = new HashMap<String, Property>();
+    
+    // link point for all exit activities
+    private Builder processExitBuilder;
+    
         
     public Bpmn20ProcessContext(Process source, Definitions definitions, TProcess target) {
         super(source, target);
@@ -115,4 +120,14 @@ public class Bpmn20ProcessContext extends AbstractProcessContext<JAXBElement<TFl
     protected Property getProcessVariable(String name) {
     	return properties.get(name);
     }
+
+	public Builder getProcessExitBuilder() {
+		return processExitBuilder;
+	}
+
+	public void setProcessExitBuilder(Builder processExitBuilder) {
+		this.processExitBuilder = processExitBuilder;
+	}
+    
+
 }

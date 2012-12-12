@@ -38,23 +38,37 @@ public class ParallelSetActivityBuilder extends ActivityBuilderImpl<Activities> 
      */
     @Override
     public void build() {
+    	
+    	int activityCount = getActivity().getActivities().size();
+    	
+    	NodeBuilder forkBuilder = null;
+    	NodeBuilder joinBuilder = null;
 
-        // In JPDL this is called a 'fork', in BPMN20 it is called a 'gateway'.
-        NodeBuilder forkBuilder = this.createNodeBuilder(getContext(), null, NodeType.DIVERGING_PARALLEL_GATEWAY);
-
-        forkBuilder.build(this);
-        setLinkTarget(forkBuilder);
-
-        NodeBuilder joinBuilder = this.createNodeBuilder(getContext(), getActivity(), NodeType.CONVERGING_PARALLEL_GATEWAY);
-        joinBuilder.build(this);
-        setLinkSource(joinBuilder);
-
+    	if (activityCount > 1) {   	
+	        forkBuilder = this.createNodeBuilder(getContext(), null, NodeType.DIVERGING_PARALLEL_GATEWAY);
+	        forkBuilder.build(this);
+	        setLinkTarget(forkBuilder);
+	        
+	        joinBuilder = this.createNodeBuilder(getContext(), getActivity(), NodeType.CONVERGING_PARALLEL_GATEWAY);
+	        joinBuilder.build(this);
+	        setLinkSource(joinBuilder);	                
+    	}
+    	
         for (JAXBElement<? extends Activity> element : getActivity().getActivities()) {
             Activity act = element.getValue();
             ActivityBuilder builder = createActivityBuilder(act);
             builder.build(this);
-            forkBuilder.link(builder);
-            builder.link(joinBuilder);
+            
+            if (activityCount > 1) {    
+            	forkBuilder.link(builder);
+            	builder.link(joinBuilder);
+            }
+            else {
+            	// there is only one activity.  Link directly to it without a gateway.
+            	setLinkTarget(builder);
+            	setLinkSource(builder);
+            }
+            
         }
     }
 }
