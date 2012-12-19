@@ -21,6 +21,7 @@
 
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Exit;
 import org.wiredwidgets.cow.server.transform.v2.NodeType;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
@@ -29,6 +30,7 @@ import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
  *
  * @author JKRANES
  */
+@Component
 public class Bpmn20ExitNodeBuilderFactory extends Bpmn20NodeBuilderFactory<Bpmn20ExitNodeBuilder, Exit> {
 
     public Bpmn20ExitNodeBuilderFactory() {

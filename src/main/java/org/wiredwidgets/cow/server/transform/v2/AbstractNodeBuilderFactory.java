@@ -23,20 +23,32 @@ package org.wiredwidgets.cow.server.transform.v2;
 
 import java.util.EnumSet;
 import java.util.Set;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
 /**
  *
  * @author JKRANES
  */
-public abstract class AbstractNodeBuilderFactory<T extends NodeBuilder, S extends Activity> implements NodeBuilderFactory<T, S> {
+public abstract class AbstractNodeBuilderFactory<T extends NodeBuilder, S extends Activity> implements NodeBuilderFactory<T, S>, InitializingBean {
 
+	@Autowired
+	NodeBuilderFactoryFactory ff;
+	
+	
     private Set<NodeType> nodeTypes = EnumSet.noneOf(NodeType.class);
     private Class<? extends ProcessContext> contextType;
 
     public AbstractNodeBuilderFactory(NodeType nodeType, Class<? extends ProcessContext> contextType) {
         this.nodeTypes.add(nodeType);
         this.contextType = contextType;
+    }
+    
+    @Override
+    public void afterPropertiesSet() {
+    	ff.addFactory(this);
     }
 
     protected void addNodeType(NodeType nodeType) {

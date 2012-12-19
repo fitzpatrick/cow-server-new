@@ -54,8 +54,16 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     //private static TypeDescriptor JBPM_HISTORY_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryProcessInstance.class));
     private static TypeDescriptor COW_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ProcessInstance.class));
 
+    private boolean loaded = false;
+    
     @Override
     public String executeProcess(ProcessInstance instance) {
+    	
+    	// One-time startup executed the first time we try to execute a process
+    	if (!loaded) {
+    		processService.loadAllProcesses();
+    		loaded = true;
+    	}
         /*
          * //OLD STUFF org.drools.runtime.process.ProcessInstance pi =
          * kSession.startProcess(instance.getProcessDefinitionKey()); return pi.getProcessId();

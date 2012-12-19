@@ -4,16 +4,15 @@
  */
 package org.wiredwidgets.cow.server.convert;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-import org.jbpm.task.query.TaskSummary;
-import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Task;
 
 /**
  *
  * @author FITZPATRICK
  */
-public class JbpmToSc2Task extends AbstractConverter implements Converter<org.jbpm.task.Task, Task>{
+@Component
+public class JbpmToSc2Task extends AbstractConverter<org.jbpm.task.Task, Task>{
 
     @Override
     public Task convert(org.jbpm.task.Task source) {
@@ -29,11 +28,11 @@ public class JbpmToSc2Task extends AbstractConverter implements Converter<org.jb
         }
 
         if (source.getTaskData().getCreatedOn() != null) {
-            target.setCreateTime(this.getConverter().convert(source.getTaskData().getCreatedOn(), XMLGregorianCalendar.class));
+            target.setCreateTime(convert(source.getTaskData().getCreatedOn()));
         }
 
         if (source.getTaskData().getExpirationTime() != null) {
-            target.setDueDate(this.getConverter().convert(source.getTaskData().getExpirationTime(), XMLGregorianCalendar.class));
+            target.setDueDate(convert(source.getTaskData().getExpirationTime()));
         }
         
         target.setId(String.valueOf(source.getId()));

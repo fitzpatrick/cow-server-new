@@ -21,16 +21,17 @@
 
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
+import org.omg.spec.bpmn._20100524.model.TGatewayDirection;
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
-import org.wiredwidgets.cow.server.api.model.v2.Activity;
 import org.wiredwidgets.cow.server.transform.v2.NodeType;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
-import org.omg.spec.bpmn._20100524.model.TGatewayDirection;
 
 /**
  *
  * @author JKRANES
  */
+@Component
 public class Bpmn20DivergingComplexGatewayNodeBuilderFactory extends Bpmn20NodeBuilderFactory<Bpmn20ComplexGatewayNodeBuilder, Activities> {
 
     public Bpmn20DivergingComplexGatewayNodeBuilderFactory() {

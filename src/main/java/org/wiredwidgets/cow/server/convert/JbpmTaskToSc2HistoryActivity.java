@@ -9,15 +9,15 @@ import java.util.Date;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.jbpm.task.TaskData;
-import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.HistoryActivity;
-import org.wiredwidgets.cow.server.api.service.HistoryTask;
 
 /**
  *
  * @author FITZPATRICK
  */
-public class JbpmTaskToSc2HistoryActivity extends AbstractConverter implements Converter<org.jbpm.task.Task, HistoryActivity> {
+@Component
+public class JbpmTaskToSc2HistoryActivity extends AbstractConverter<org.jbpm.task.Task, HistoryActivity> {
 
     // private static Logger log = Logger.getLogger(JbpmTaskToSc2HistoryTask.class);
     @Override
@@ -46,7 +46,4 @@ public class JbpmTaskToSc2HistoryActivity extends AbstractConverter implements C
         return target;
     }
     
-    private XMLGregorianCalendar convert(Date date) {
-        return getConverter().convert(date, XMLGregorianCalendar.class);
-    }
 }

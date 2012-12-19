@@ -18,16 +18,18 @@ package org.wiredwidgets.cow.server.transform.v2;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.log4j.Logger;
-import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
 /**
  * Holds references to all candidate ActivityBuilderFactories and selects the correct ActivityBuilderFactory
  * to be used for specified conditions.
  * @author JKRANES
  */
+@Component
 public class ActivityBuilderFactoryFactory {
 
     @Autowired
@@ -47,6 +49,10 @@ public class ActivityBuilderFactoryFactory {
 
     public void setFactories(List<ActivityBuilderFactory> factories) {
         this.factories = factories;
+    }
+    
+    public void addFactory(ActivityBuilderFactory factory) {
+    	factories.add(factory);
     }
 
     /*

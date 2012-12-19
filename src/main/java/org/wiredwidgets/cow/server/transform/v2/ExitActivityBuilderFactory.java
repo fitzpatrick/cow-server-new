@@ -21,12 +21,14 @@
 
 package org.wiredwidgets.cow.server.transform.v2;
 
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Exit;
 
 /**
  *
  * @author JKRANES
  */
+@Component
 public class ExitActivityBuilderFactory extends ActivityBuilderFactory<Exit> {
     
     public ExitActivityBuilderFactory() {

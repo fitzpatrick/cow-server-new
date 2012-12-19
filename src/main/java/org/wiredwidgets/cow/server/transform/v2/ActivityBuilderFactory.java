@@ -17,14 +17,15 @@
 package org.wiredwidgets.cow.server.transform.v2;
 
 import org.apache.log4j.Logger;
-import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
 /**
  * Factory class for obtaining an ActivityBuilderFactory instance based on the activity and type of notation (ProcessContext)
  * @author JKRANES
  */
-public abstract class ActivityBuilderFactory<T extends Activity> {
+public abstract class ActivityBuilderFactory<T extends Activity> implements InitializingBean {
 
     protected static Logger log = Logger.getLogger(ActivityBuilderFactory.class);
     @Autowired
@@ -43,6 +44,10 @@ public abstract class ActivityBuilderFactory<T extends Activity> {
     public ActivityBuilderFactory(Class<T> activityClass, Class<? extends ProcessContext> contextClass) {
         this.activityClass = activityClass;
         this.contextClass = contextClass;
+    }
+    
+    public void afterPropertiesSet() {
+    	activityBuilderFactoryFactory.addFactory(this);
     }
 
     private boolean supportsActivityClass(Class<? extends Activity> activityClass) {

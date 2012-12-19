@@ -10,14 +10,13 @@ import java.util.Map;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
-import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
 import org.jbpm.task.Content;
 import org.jbpm.task.TaskData;
 import org.jbpm.task.service.responsehandlers.BlockingGetContentResponseHandler;
 import org.jbpm.task.service.responsehandlers.BlockingGetTaskResponseHandler;
 import org.jbpm.task.utils.ContentMarshallerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
@@ -26,7 +25,8 @@ import org.wiredwidgets.cow.server.api.service.Variables;
  *
  * @author FITZPATRICK
  */
-public class JbpmTaskToSc2Task extends AbstractConverter implements Converter<org.jbpm.task.Task, Task> {
+@Component
+public class JbpmTaskToSc2Task extends AbstractConverter<org.jbpm.task.Task, Task> {
 
     // NOTE: Autowiring does not work here!
     @Autowired
@@ -53,11 +53,11 @@ public class JbpmTaskToSc2Task extends AbstractConverter implements Converter<or
         }
 
         if (source != null && source.getCreatedOn() != null) {
-            target.setCreateTime(this.getConverter().convert(source.getCreatedOn(), XMLGregorianCalendar.class));
+            target.setCreateTime(convert(source.getCreatedOn()));
         }
 
         if (source != null && source.getExpirationTime() != null) {
-            target.setDueDate(this.getConverter().convert(source.getExpirationTime(), XMLGregorianCalendar.class));
+            target.setDueDate(convert(source.getExpirationTime()));
         }
         
         target.setId(String.valueOf(s.getId()));
