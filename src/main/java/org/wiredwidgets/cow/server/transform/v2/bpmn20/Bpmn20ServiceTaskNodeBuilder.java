@@ -22,36 +22,56 @@
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
+
+import org.omg.spec.bpmn._20100524.model.Property;
+import org.omg.spec.bpmn._20100524.model.TTask;
 import org.wiredwidgets.cow.server.api.model.v2.ServiceTask;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
-import org.omg.spec.bpmn._20100524.model.TServiceTask;
+
 
 /**
  *
  * @author JKRANES
  */
-public class Bpmn20ServiceTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TServiceTask, ServiceTask> {
+public class Bpmn20ServiceTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TTask, ServiceTask> {
 
     public Bpmn20ServiceTaskNodeBuilder(ProcessContext context, ServiceTask task) {
-        super(context, new TServiceTask(), task);
+        super(context, new TTask(), task);
     }
 
     @Override
     protected void buildInternal() {
 
         ServiceTask source = getActivity();
-        TServiceTask t = getNode();
+        TTask t = getNode();
         t.setId(getContext().generateId("_"));
         source.setKey(t.getName());
         t.setName(source.getName());
-
-        // TODO: complete implementation of service task for BPMN20
+   
+        // this is the name JBPM uses to assign a work item handler
+        t.getOtherAttributes().put(new QName("http://www.jboss.org/drools","taskName"), "RestService");
+        
+        t.setIoSpecification(ioSpec);     
+        ioSpec.getInputSets().add(inputSet);       
+        ioSpec.getOutputSets().add(outputSet);
+        
+        ServiceTask st = getActivity();
+        
+        Property varsProperty = getContext().getProcessVariable(Bpmn20ProcessBuilder.VARIABLES_PROPERTY);
+        addDataInput(Bpmn20UserTaskNodeBuilder.TASK_INPUT_VARIABLES_NAME, varsProperty);
+        addDataOutput(Bpmn20UserTaskNodeBuilder.TASK_OUTPUT_VARIABLES_NAME, varsProperty);
+        
+        addDataInput("method", st.getMethod());
+        addDataInput("url", st.getUrl());
+        addDataInput("content", st.getContent());
+        addDataInput("var", st.getVar());
 
     }
     
     @Override
-    protected JAXBElement<TServiceTask> createNode() {
-        return factory.createServiceTask(getNode());
+    protected JAXBElement<TTask> createNode() {
+        return factory.createTask(getNode());
     }
 
 }

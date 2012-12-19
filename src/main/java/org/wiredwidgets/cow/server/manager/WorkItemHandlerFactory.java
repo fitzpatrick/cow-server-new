@@ -9,6 +9,10 @@ public class WorkItemHandlerFactory {
 	public static GenericHTWorkItemHandler createInstance(StatefulKnowledgeSession session) {
 		GenericHTWorkItemHandler handler = new MinaHTWorkItemHandler(session);
 		session.getWorkItemManager().registerWorkItemHandler("Human Task", handler);
+		
+		RestServiceTaskHandler restHandler = new RestServiceTaskHandler();
+		session.getWorkItemManager().registerWorkItemHandler("RestService", restHandler);
+
 		return handler;
 	}
 
