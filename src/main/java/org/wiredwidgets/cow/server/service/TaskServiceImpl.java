@@ -19,6 +19,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.log4j.Logger;
 import org.drools.runtime.process.WorkflowProcessInstance;
+import org.jbpm.process.audit.JPAProcessInstanceDbLog;
+import org.jbpm.process.audit.VariableInstanceLog;
 import org.jbpm.task.Content;
 import org.jbpm.task.Deadline;
 import org.jbpm.task.Deadlines;
@@ -123,6 +125,9 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
 
     @Override
     public void completeTask(Long id, String assignee, String outcome, Map<String, Object> variables) {
+    	// should be handled upstream in controller
+    	assert(assignee != null);
+    	
         log.debug(assignee + " starting task with ID: " + id);
         
         BlockingTaskOperationResponseHandler operationResponseHandler = new BlockingTaskOperationResponseHandler();
@@ -159,8 +164,24 @@ public class TaskServiceImpl extends AbstractCowServiceImpl implements TaskServi
         // Map<String, Object> inputVarsMap = (Map<String, Object>) inputMap.get(TASK_INPUT_VARIABLES_NAME);
               
         // So, instead, we get the current values directly from the process instance, rather than the values copied into the task
-        WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(task.getTaskData().getProcessInstanceId());
-        Map<String, Object> inputVarsMap = (Map<String, Object>) pi.getVariable(VARIABLES_PROPERTY);
+        
+        Long processInstanceId = task.getTaskData().getProcessInstanceId();
+        Map<String, Object> inputVarsMap = null;
+        
+        try {
+        	WorkflowProcessInstance pi = (WorkflowProcessInstance) kSession.getProcessInstance(processInstanceId);
+        	inputVarsMap = (Map<String, Object>) pi.getVariable(VARIABLES_PROPERTY);
+        }
+        catch (Exception e) {
+        	// not an active process?  look in the dB.
+        	log.error(e);
+        	List<VariableInstanceLog> vars = JPAProcessInstanceDbLog.findVariableInstances(processInstanceId, VARIABLES_PROPERTY);
+        	log.info("variable count: " + vars.size());
+        	if (vars.size() > 0) {
+        		// why more than one???
+        		inputVarsMap = (Map<String, Object>) vars.get(0);
+        	}
+        }
         
         if (inputVarsMap != null) {
         	// initialize the output map with the input values

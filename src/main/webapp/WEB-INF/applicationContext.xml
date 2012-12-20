@@ -137,13 +137,13 @@
         <property name="taskClient" ref="taskClient" />
     </bean>
     
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    
     <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="emf"/>
         <property name="dataSource" ref="myDataSource" />
         <property name="jpaDialect" ref="jpaDialect" />
     </bean>
-    
-    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
     
     <tx:annotation-driven transaction-manager="txManager" />
 
@@ -151,29 +151,14 @@
 
     <jbpm:kbase id="kBase" node="node1"/>
     
-    <bean id="knowledgeSessionFactory" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionFactory" >
-       <!-- <constructor-arg ref="kBase" />
-        <constructor-arg ref="emf" />
-        <constructor-arg ref="txManager" />-->
-    </bean>
-    
+    <bean id="knowledgeSessionFactory" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionFactory" />
+   
     <bean id="kSession" factory-bean="knowledgeSessionFactory" factory-method="createInstance" />
     
-    <!--<jbpm:ksession id="kSession" type="stateful" kbase="kBase" node="node1">
-        <jbpm:configuration>
-            <jbpm:jpa-persistence>
-                <jbpm:transaction-manager ref="txManager"/>
-                <jbpm:entity-manager-factory ref="emf"/>
-            </jbpm:jpa-persistence>
-        </jbpm:configuration>
-    </jbpm:ksession>--> 
+    <bean id="logger" class="org.jbpm.process.audit.JPAWorkingMemoryDbLogger" c:session-ref="kSession" destroy-method="dispose" />
     
     <bean id="workItemHandler" class="org.wiredwidgets.cow.server.manager.WorkItemHandlerFactory" factory-method="createInstance" c:session-ref="kSession"  />
-  
-<!--     <bean id="kSessionManager" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionManager" init-method="init"> -->
-<!--         <property name="kSession" ref="kSession" /> -->
-<!--     </bean> -->
-    
+     
     <bean id="testJBPMEventListener" class="org.wiredwidgets.cow.server.listener.TestJBPMEventListener">
         <property name="sessionProcessListener" ref="kSession" />
     </bean>

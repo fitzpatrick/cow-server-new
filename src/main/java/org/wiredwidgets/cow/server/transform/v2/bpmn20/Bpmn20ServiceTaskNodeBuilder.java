@@ -50,7 +50,7 @@ public class Bpmn20ServiceTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TTas
         t.setName(source.getName());
    
         // this is the name JBPM uses to assign a work item handler
-        t.getOtherAttributes().put(new QName("http://www.jboss.org/drools","taskName"), "RestService");
+        addOtherAttribute("taskName", "RestService");
         
         t.setIoSpecification(ioSpec);     
         ioSpec.getInputSets().add(inputSet);       

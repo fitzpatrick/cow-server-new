@@ -72,6 +72,8 @@ public class JbpmTaskSummaryToSc2Task extends AbstractConverter<org.jbpm.task.qu
         target.setActivityName(parts[0]);
         target.setName(parts[1]);
         
+        target.setState(source.getStatus().name());
+        
         target.setPriority(new Integer(source.getPriority()));
         target.setProcessInstanceId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
         

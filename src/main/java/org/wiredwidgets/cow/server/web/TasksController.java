@@ -14,34 +14,35 @@
  */
 package org.wiredwidgets.cow.server.web;
 
-import java.util.*;
-import java.util.logging.Level;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import static javax.servlet.http.HttpServletResponse.*;
+
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
-import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.wiredwidgets.cow.server.api.service.HistoryTask;
 import org.wiredwidgets.cow.server.api.service.HistoryTasks;
 import org.wiredwidgets.cow.server.api.service.Participations;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Tasks;
-//import org.wiredwidgets.cow.server.rss.FeedFromTaskList;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.format.annotation.DateTimeFormat.ISO;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-// import org.wiredwidgets.cow.server.test.TestHumanVars;
 import org.wiredwidgets.cow.server.service.TaskService;
-import org.wiredwidgets.cow.server.service.TaskServiceImpl;
+//import org.wiredwidgets.cow.server.rss.FeedFromTaskList;
+// import org.wiredwidgets.cow.server.test.TestHumanVars;
 
 /**
  * Handles REST API methods for the /tasks resource
@@ -77,7 +78,7 @@ public class TasksController {
     @RequestMapping(method = RequestMethod.POST)
     public void createTask(@RequestBody Task task, HttpServletRequest request, HttpServletResponse response) {
         String id = this.taskService.createAdHocTask(task);
-        response.setStatus(HttpServletResponse.SC_CREATED); // 201
+        response.setStatus(SC_CREATED); // 201
         response.setHeader("Location", request.getRequestURL() + "/active/" + id);
     }
 
@@ -94,14 +95,14 @@ public class TasksController {
         try{            
         Task task = taskService.getTask(Long.valueOf(id));
         if (task == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(SC_NOT_FOUND);
             return null;
         } else {
             return task;
         }
         }catch(Exception e){
             log.error(e);
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            response.setStatus(SC_NOT_FOUND);
             return null;
         }
     }
@@ -124,38 +125,44 @@ public class TasksController {
      */
     @RequestMapping(value = "/active/{id}", method = RequestMethod.DELETE)
     @ResponseBody
-    public void completeTask(@PathVariable("id") String id, @RequestParam(value = "outcome", required = false) String outcome, @RequestParam(value = "var", required = false) String variables, HttpServletResponse response, HttpServletRequest request) {
+    public void completeTask(@PathVariable("id") String id, @RequestParam(value = "outcome", required = false) String outcome, @RequestParam(value = "var", required = false) String variables, HttpServletResponse response, HttpServletRequest request) throws IOException {
         // verify existence
 
         Task task = taskService.getTask(Long.valueOf(id));       
 
         if (task == null) {
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND); // 404
-        } else {
-        	Map<String, Object> varMap = new HashMap<String, Object>();
-            if (variables != null) {
-                // Note: allowing Spring to create the array has some undesired behaviors in some cases.  For example
-                // if the query string contains a comma, Spring treats it as multi-valued.
-                // Since we don't want that, we instead use the underlying request object to get the array.
-                String[] vars = request.getParameterValues("var");
-                for (String variable : vars) {
-                    // variable is a string in the format name:value
-                    // Only split on the first ":" found; the value section may contain additional ":" tokens.
-                    String[] split = variable.split(":", 2);
-                    varMap.put(split[0], split[1]);
-                    log.debug(split[0] + "=" + split[1]);
-                }
-            }
-            log.debug("Completing task: id=" + id + " outcome=" + outcome);
-            log.debug("Vars: " + varMap);
-
-            taskService.completeTask(Long.valueOf(id), task.getAssignee(), outcome, varMap);
-
-            response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
-
-            //Task t = taskService.getTask(id);
-            //amqpNotifier.amqpTaskPublish(t, "process", "TaskCompleted", id);
+            response.setStatus(SC_NOT_FOUND); // 404
+            return;
         }
+    	if (task.getAssignee() == null) {
+    		response.sendError(SC_BAD_REQUEST, "Task is unassigned.  Cannot complete");
+    		return;
+    	}
+        		
+    	Map<String, Object> varMap = new HashMap<String, Object>();
+        if (variables != null) {
+            // Note: allowing Spring to create the array has some undesired behaviors in some cases.  For example
+            // if the query string contains a comma, Spring treats it as multi-valued.
+            // Since we don't want that, we instead use the underlying request object to get the array.
+            String[] vars = request.getParameterValues("var");
+            for (String variable : vars) {
+                // variable is a string in the format name:value
+                // Only split on the first ":" found; the value section may contain additional ":" tokens.
+                String[] split = variable.split(":", 2);
+                varMap.put(split[0], split[1]);
+                log.debug(split[0] + "=" + split[1]);
+            }
+        }
+        log.debug("Completing task: id=" + id + " outcome=" + outcome);
+        log.debug("Vars: " + varMap);
+
+        taskService.completeTask(Long.valueOf(id), task.getAssignee(), outcome, varMap);
+
+        response.setStatus(SC_NO_CONTENT); // 204
+
+        //Task t = taskService.getTask(id);
+        //amqpNotifier.amqpTaskPublish(t, "process", "TaskCompleted", id);
+        
     }
 
     /**
@@ -179,7 +186,7 @@ public class TasksController {
         } else {
             taskService.takeTask(Long.valueOf(id), assignee);
         }
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
+        response.setStatus(SC_NO_CONTENT); // 204
 
         //Task t = taskService.getTask(id);
         //amqpNotifier.amqpTaskPublish(t, "process", "TaskTaken", id);*/
@@ -202,7 +209,7 @@ public class TasksController {
             task.setId(id); 
         } 
         this.taskService.updateTask(task);
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+        response.setStatus(SC_NO_CONTENT);
        
         //throw new UnsupportedOperationException("Not supported yet.");
     }
@@ -413,33 +420,28 @@ public class TasksController {
     public void addGroupParticipation(@PathVariable("taskId") String taskId, @RequestParam("group") String group, @RequestParam("type") String type, HttpServletResponse response) {
         /*
          * this.taskService.addTaskParticipatingGroup(taskId, group, type);*/
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
-        //throw new UnsupportedOperationException("Not supported yet.");
+        response.setStatus(SC_NO_CONTENT); // 204
     }
 
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, params = "group")
     public void deleteGroupParticipation(@PathVariable("taskId") String taskId, @RequestParam("group") String group, @RequestParam("type") String type, HttpServletResponse response) {
         /*
          * this.taskService.removeTaskParticipatingGroup(taskId, group, type);*/
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
-        //throw new UnsupportedOperationException("Not supported yet.");
+        response.setStatus(SC_NO_CONTENT); // 204
     }
 
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.POST, params = "user")
     public void addUserParticipation(@PathVariable("taskId") String taskId, @RequestParam("user") String user, @RequestParam("type") String type, HttpServletResponse response) {
         /*
          * this.taskService.addTaskParticipatingUser(taskId, user, type);*/
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
-         
-        //throw new UnsupportedOperationException("Not supported yet.");
+        response.setStatus(SC_NO_CONTENT); // 204
     }
 
     @RequestMapping(value = "/participations/{taskId}", method = RequestMethod.DELETE, params = "user")
     public void deleteUserParticipation(@PathVariable("taskId") String taskId, @RequestParam("user") String user, @RequestParam("type") String type, HttpServletResponse response) {
         /*
          * this.taskService.removeTaskParticipatingUser(taskId, user, type);*/
-        response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
-        //throw new UnsupportedOperationException("Not supported yet.");
+        response.setStatus(SC_NO_CONTENT); // 204
     }
 
     @RequestMapping(value = "/orphaned")

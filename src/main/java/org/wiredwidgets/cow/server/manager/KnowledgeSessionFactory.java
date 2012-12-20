@@ -61,10 +61,7 @@ public class KnowledgeSessionFactory {
             kSession = JPAKnowledgeService.newStatefulKnowledgeSession(kBase, config, env);
         }
         
-        new JPAWorkingMemoryDbLogger(kSession);
         JPAProcessInstanceDbLog.setEnvironment(env);
-        /// minaWorkItemHandler = new MinaHTWorkItemHandler(kSession);
-        // kSession.getWorkItemManager().registerWorkItemHandler("Human Task", workItemHandler);
         
         return kSession;
         /*
@@ -77,7 +74,4 @@ public class KnowledgeSessionFactory {
         kSession = JPAKnowledgeService.loadStatefulKnowledgeSession(4, kBase, null, env);*/
     }
     
-    public void init() {
-    	// kSession.getWorkItemManager().registerWorkItemHandler("Human Task", workItemHandler);
-    }
 }

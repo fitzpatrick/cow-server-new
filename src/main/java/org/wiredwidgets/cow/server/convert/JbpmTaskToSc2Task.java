@@ -61,6 +61,9 @@ public class JbpmTaskToSc2Task extends AbstractConverter<org.jbpm.task.Task, Tas
         }
         
         target.setId(String.valueOf(s.getId()));
+        target.setProcessInstanceId(String.valueOf(source.getProcessInstanceId()));
+        
+        target.setState(source.getStatus().name());
         
         if (s.getNames() != null && !s.getNames().isEmpty()){
         	// see Bpmn20UserTaskNodeBuilder
@@ -125,9 +128,9 @@ public class JbpmTaskToSc2Task extends AbstractConverter<org.jbpm.task.Task, Tas
      * Tasks in parallel structures may cause sub-executions  with IDs in the form key.number.number.number
      * In this case we only want to look at the top level process execution.  
      */
-    private String getTopLevelExecutionId(String executionId) {
-        String[] parts = executionId.split("\\.");
-        return parts[0] + "." + parts[1];
-    }
+//    private String getTopLevelExecutionId(String executionId) {
+//        String[] parts = executionId.split("\\.");
+//        return parts[0] + "." + parts[1];
+//    }
 
 }

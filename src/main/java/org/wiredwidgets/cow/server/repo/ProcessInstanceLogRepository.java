@@ -16,6 +16,8 @@ import org.springframework.data.repository.CrudRepository;
 public interface ProcessInstanceLogRepository extends CrudRepository<ProcessInstanceLog, Long>{
     
     public List<ProcessInstanceLog> findByStatus(int status);
+    
+    public List<ProcessInstanceLog> findByProcessId(String processId);
 	
     public List<ProcessInstanceLog> findByProcessIdAndStatus(String processId, int status);
     

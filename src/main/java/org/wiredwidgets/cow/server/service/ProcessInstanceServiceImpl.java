@@ -54,21 +54,10 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     //private static TypeDescriptor JBPM_HISTORY_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(org.jbpm.api.history.HistoryProcessInstance.class));
     private static TypeDescriptor COW_PROCESS_INSTANCE_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(ProcessInstance.class));
 
-    private boolean loaded = false;
-    
+  
     @Override
     public String executeProcess(ProcessInstance instance) {
     	
-    	// One-time startup executed the first time we try to execute a process
-    	if (!loaded) {
-    		processService.loadAllProcesses();
-    		loaded = true;
-    	}
-        /*
-         * //OLD STUFF org.drools.runtime.process.ProcessInstance pi =
-         * kSession.startProcess(instance.getProcessDefinitionKey()); return pi.getProcessId();
-         */
-
         Map<String, Object> vars = new HashMap<String, Object>();
         Map<String, Object> processVars = new HashMap<String, Object>();
         
@@ -142,16 +131,12 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 
     @Override
     public void deleteProcessInstancesByKey(String key) {
-        List<ProcessInstance> procList = getCOWProcessInstances();
-
-        for (ProcessInstance proc : procList) {
-            if (proc.getKey() != null && proc.getKey().equals(key)) {
-                try {
-                	// id uses x.y format
-                    kSession.abortProcessInstance(Long.parseLong(proc.getId().split("\\.")[1]));
-                } catch (IllegalArgumentException e) {
-                    log.error(e);
-                }
+        List<ProcessInstanceLog> procList = processInstanceLogRepo.findByProcessId(key);
+        for (ProcessInstanceLog pil : procList) {
+            try {
+                kSession.abortProcessInstance(pil.getId());
+            } catch (IllegalArgumentException e) {
+                log.error(e);
             }
         }
     }
