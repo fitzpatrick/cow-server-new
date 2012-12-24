@@ -21,12 +21,14 @@
 
 package org.wiredwidgets.cow.server.transform.v2;
 
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.ServiceTask;
 
 /**
  *
  * @author JKRANES
  */
+@Component
 public class ServiceTaskActivityBuilderFactory extends ActivityBuilderFactory<ServiceTask> {
     
     public ServiceTaskActivityBuilderFactory() {

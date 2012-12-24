@@ -21,6 +21,7 @@
 
 package org.wiredwidgets.cow.server.transform.v2;
 
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessContext;
 
@@ -28,6 +29,7 @@ import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessContext;
  *
  * @author JKRANES
  */
+@Component
 public class GatewayLoopActivityBuilderFactory extends ActivityBuilderFactory<Loop> {
     
     public GatewayLoopActivityBuilderFactory() {

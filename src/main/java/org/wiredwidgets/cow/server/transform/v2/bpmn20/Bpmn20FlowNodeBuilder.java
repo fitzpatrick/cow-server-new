@@ -108,5 +108,9 @@ public abstract class Bpmn20FlowNodeBuilder<T extends TFlowNode, V extends Activ
     protected Bpmn20ProcessContext getContext() {
         return (Bpmn20ProcessContext) super.getContext();
     }
+    
+    protected void addOtherAttribute(String name, String value) {
+        getNode().getOtherAttributes().put(new QName("http://www.jboss.org/drools", name), value);
+    }
 
 }

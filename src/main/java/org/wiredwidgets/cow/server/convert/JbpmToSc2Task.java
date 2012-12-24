@@ -4,40 +4,48 @@
  */
 package org.wiredwidgets.cow.server.convert;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-import org.jbpm.task.query.TaskSummary;
-import org.springframework.core.convert.converter.Converter;
+import org.jbpm.task.TaskData;
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.Task;
 
 /**
  *
  * @author FITZPATRICK
  */
-public class JbpmToSc2Task extends AbstractConverter implements Converter<org.jbpm.task.Task, Task>{
+@Component
+public class JbpmToSc2Task extends AbstractConverter<org.jbpm.task.Task, Task>{
 
     @Override
     public Task convert(org.jbpm.task.Task source) {
         
         Task target = new Task();
+        TaskData td = source.getTaskData();
 
         if (source.getDescriptions() != null){
             target.setDescription(source.getDescriptions().get(0).getText());
         }
 
-        if (source.getTaskData().getActualOwner() != null){
-            target.setAssignee(source.getTaskData().getActualOwner().getId());
+        if (td.getActualOwner() != null){
+            target.setAssignee(td.getActualOwner().getId());
         }
 
-        if (source.getTaskData().getCreatedOn() != null) {
-            target.setCreateTime(this.getConverter().convert(source.getTaskData().getCreatedOn(), XMLGregorianCalendar.class));
+        if (td.getCreatedOn() != null) {
+            target.setCreateTime(convert(td.getCreatedOn()));
         }
 
-        if (source.getTaskData().getExpirationTime() != null) {
-            target.setDueDate(this.getConverter().convert(source.getTaskData().getExpirationTime(), XMLGregorianCalendar.class));
+        if (td.getExpirationTime() != null) {
+            target.setDueDate(convert(td.getExpirationTime()));
         }
         
         target.setId(String.valueOf(source.getId()));
         target.setPriority(new Integer(source.getPriority()));
+        target.setProcessInstanceId(td.getProcessId() + "." + String.valueOf(td.getProcessInstanceId()));
+        
+        if (source.getNames() != null && source.getNames().size() > 0) {
+	        String[] parts = source.getNames().get(0).getText().split("/");
+	        target.setActivityName(parts[0]);
+	        target.setName(parts[1]);      
+        }
 
         // add variables
         /*Set<String> names = taskService.getVariableNames(source.getId());

@@ -22,36 +22,77 @@
 package org.wiredwidgets.cow.server.transform.v2.bpmn20;
 
 import javax.xml.bind.JAXBElement;
-import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
-import org.omg.spec.bpmn._20100524.model.TSubProcess;
+import javax.xml.namespace.QName;
+
+import org.omg.spec.bpmn._20100524.model.Property;
+import org.omg.spec.bpmn._20100524.model.TCallActivity;
+import org.wiredwidgets.cow.server.api.model.v2.Parameter;
 import org.wiredwidgets.cow.server.api.model.v2.SubProcess;
+import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
 /**
  *
  * @author JKRANES
  */
-public class Bpmn20SubProcessNodeBuilder extends Bpmn20FlowNodeBuilder<TSubProcess, SubProcess> {
+public class Bpmn20SubProcessNodeBuilder extends Bpmn20ActivityNodeBuilder<TCallActivity, SubProcess> {
 
     public Bpmn20SubProcessNodeBuilder(ProcessContext context, SubProcess subProcess) {
-        super(context, new TSubProcess(), subProcess);
+        super(context, new TCallActivity(), subProcess);
     }
 
     @Override
     protected void buildInternal() {
 
         SubProcess source = getActivity();
-        TSubProcess t = getNode();
+        TCallActivity t = getNode();
         t.setId(getContext().generateId("_"));
-        source.setKey(t.getName());
+        source.setKey(t.getId());
         t.setName(source.getName());
 
-        // TODO: complete implementation of subprocess for BPMN20
+        // the process ID of the called process
+        t.setCalledElement(new QName(source.getSubProcessKey()));
+        
+        t.setIoSpecification(ioSpec);     
+        ioSpec.getInputSets().add(inputSet);       
+        ioSpec.getOutputSets().add(outputSet);        
+        
+        // this means that if the parent process is terminated the subprocess will also be terminated.
+        addOtherAttribute("independent","false");
+        
+        // input params
+        for (Parameter param : source.getParameterIns()) {
+        	if (param.getExpr() != null) {
+        		// input is an expression
+        		addDataInput(param.getSubvar(), param.getExpr());
+        	}
+        	else {
+        		Property p = new Property();
+        		p.setId(param.getVar());
+        		p.setName(param.getVar());
+        		p.setItemSubjectRef(new QName(param.getVar()));
+        		addDataInput(param.getSubvar(), p);
+        	}
+        }
+        
+        // output params
+        for (Parameter param : source.getParameterOuts()) {
+        	if (param.getExpr() != null) {
+        		addDataOutput(param.getSubvar(), param.getExpr());
+        	}        	
+        	else {
+        		Property p = new Property();
+        		p.setId(param.getVar());
+        		p.setName(param.getVar());
+        		p.setItemSubjectRef(new QName(param.getVar()));
+        		addDataOutput(param.getSubvar(), p);
+        	}
+        }
 
     }
     
     @Override
-    protected JAXBElement<TSubProcess> createNode() {
-        return factory.createSubProcess(getNode());
+    protected JAXBElement<TCallActivity> createNode() {
+        return factory.createCallActivity(getNode());
     }
 
 }

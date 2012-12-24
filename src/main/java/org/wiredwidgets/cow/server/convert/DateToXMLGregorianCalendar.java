@@ -23,16 +23,19 @@ package org.wiredwidgets.cow.server.convert;
 
 import java.util.Date;
 import java.util.GregorianCalendar;
+
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
-import org.springframework.core.convert.converter.Converter;
+
+import org.springframework.stereotype.Component;
 
 /**
  *
  * @author JKRANES
  */
-public class DateToXMLGregorianCalendar implements Converter<Date, XMLGregorianCalendar> {
+@Component
+public class DateToXMLGregorianCalendar extends AbstractConverter<Date, XMLGregorianCalendar> {
 
     DatatypeFactory dtf;
 

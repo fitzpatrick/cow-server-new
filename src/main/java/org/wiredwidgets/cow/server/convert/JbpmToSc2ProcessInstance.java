@@ -16,19 +16,18 @@
 
 package org.wiredwidgets.cow.server.convert;
 
-import java.util.Map;
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.api.service.Variables;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
 
 /**
  *
  * @author JKRANES
  */
-public class JbpmToSc2ProcessInstance implements Converter<org.drools.runtime.process.ProcessInstance, ProcessInstance> {
+@Component
+public class JbpmToSc2ProcessInstance extends AbstractConverter<org.drools.runtime.process.ProcessInstance, ProcessInstance> {
 
     /*@Autowired
     ProcessEngine engine;*/

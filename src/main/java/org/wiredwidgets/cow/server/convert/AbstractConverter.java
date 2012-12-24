@@ -21,39 +21,40 @@
 
 package org.wiredwidgets.cow.server.convert;
 
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.core.convert.ConversionService;
+import java.util.Date;
+
+import javax.xml.datatype.XMLGregorianCalendar;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.core.convert.support.GenericConversionService;
 
 /**
  * Exposes the conversion service to converters.
  * @author JKRANES
  */
-public abstract class AbstractConverter implements BeanFactoryAware {
+public abstract class AbstractConverter<S, T> implements Converter<S, T>, InitializingBean {
 
-    private ConversionService converter;
-    protected BeanFactory factory;
-
-    /*
-     * Note that the ConversionService bean CANNOT be injected directly,
-     * because this creates circular reference problems -- individual converters
-     * must be fully created before the service is created so they cannot depend on
-     * the ConversionService.  So instead we use lazy-initialization and do not
-     * wire the reference until the converter is actually invoked.
-     */
-    protected ConversionService getConverter() {
-        if (converter == null) {
-            converter = factory.getBean(ConversionService.class);
-        }
-        return converter;
-    }
-
+	@Autowired
+    private GenericConversionService converter;
+	
     @Override
-    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.factory = beanFactory;
+    public void afterPropertiesSet() {
+    	converter.addConverter(this);
     }
-
+    
+    protected <U> U convert(Object source, Class<U> targetType) {
+    	return converter.convert(source, targetType);
+    }	
+    
+    protected XMLGregorianCalendar convert(Date date) {
+        return convert(date, XMLGregorianCalendar.class);
+    }
+    
+    protected Date convert(XMLGregorianCalendar gc) {
+    	return convert(gc, Date.class);
+    }
 
 
 }

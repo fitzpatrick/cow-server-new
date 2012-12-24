@@ -6,7 +6,9 @@ package org.wiredwidgets.cow.server.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.springframework.core.convert.TypeDescriptor;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.api.service.Group;
 import org.wiredwidgets.cow.server.api.service.User;
@@ -16,6 +18,7 @@ import org.wiredwidgets.cow.server.api.service.User;
  * @author FITZPATRICK
  */
 @Transactional
+@Component
 public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersService {
 
     private static TypeDescriptor JBPM_USER_LIST = TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(User.class));

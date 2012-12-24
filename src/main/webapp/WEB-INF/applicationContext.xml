@@ -61,33 +61,19 @@
     <!-- properties file used to provide values for ${property} expressions -->
     <context:property-placeholder location="classpath:cow-server.properties" />
     
-    <context:component-scan base-package="org.wiredwidgets.cow.server.completion" />
+    <!-- scan and load annotated components -->
+    <context:component-scan base-package=
+       "org.wiredwidgets.cow.server.completion, 
+    	org.wiredwidgets.cow.server.convert, 
+    	org.wiredwidgets.cow.server.service, 
+    	org.wiredwidgets.cow.server.transform" /> 
     
     <!--<bean id="cow" class="org.wiredwidgets.cow.server.api.service.Cow" >
         <property name="version" value="${project.version}" />
     </bean>   -->
     
-    <!-- Custom converter classes used by the ConversionService -->
-    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean" >
-        <property name="converters">
-            <util:set>
-                <bean class="org.wiredwidgets.cow.server.convert.DateToXMLGregorianCalendar" />
-				<bean class="org.wiredwidgets.cow.server.convert.JbpmTaskToSc2HistoryTask" />
-				<bean class="org.wiredwidgets.cow.server.convert.JbpmTaskToSc2HistoryActivity" />
-<!--                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2HistoryActivity" /> -->
-				<!-- <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessInstance" /> -->
-                <bean class="org.wiredwidgets.cow.server.convert.JbpmProcessInstanceLogToSc2ProcessInstance" />
-
-<!--                 <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2ProcessDefinition" /> -->
-                <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2Task" />
-                <bean class="org.wiredwidgets.cow.server.convert.JbpmTaskSummaryToSc2Task" />
-                <bean class="org.wiredwidgets.cow.server.convert.JbpmTaskToSc2Task" />
-                <!--<bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2User" />
-                <bean class="org.wiredwidgets.cow.server.convert.JbpmToSc2Group" />
-                <bean class="org.wiredwidgets.cow.server.convert.Sc2ToJbpmTask" />-->
-            </util:set>
-        </property>
-    </bean>
+    <!-- Note that individual converters are loaded via component scanning -->
+    <bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean" />
     
     <bean id="myDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
         <property name="driverClassName" value="${datasource.driverClassName}" />
@@ -151,13 +137,13 @@
         <property name="taskClient" ref="taskClient" />
     </bean>
     
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+    
     <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
         <property name="entityManagerFactory" ref="emf"/>
         <property name="dataSource" ref="myDataSource" />
         <property name="jpaDialect" ref="jpaDialect" />
     </bean>
-    
-    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
     
     <tx:annotation-driven transaction-manager="txManager" />
 
@@ -165,29 +151,14 @@
 
     <jbpm:kbase id="kBase" node="node1"/>
     
-    <bean id="knowledgeSessionFactory" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionFactory" >
-       <!-- <constructor-arg ref="kBase" />
-        <constructor-arg ref="emf" />
-        <constructor-arg ref="txManager" />-->
-    </bean>
-    
+    <bean id="knowledgeSessionFactory" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionFactory" />
+   
     <bean id="kSession" factory-bean="knowledgeSessionFactory" factory-method="createInstance" />
     
-    <!--<jbpm:ksession id="kSession" type="stateful" kbase="kBase" node="node1">
-        <jbpm:configuration>
-            <jbpm:jpa-persistence>
-                <jbpm:transaction-manager ref="txManager"/>
-                <jbpm:entity-manager-factory ref="emf"/>
-            </jbpm:jpa-persistence>
-        </jbpm:configuration>
-    </jbpm:ksession>--> 
+    <bean id="logger" class="org.jbpm.process.audit.JPAWorkingMemoryDbLogger" c:session-ref="kSession" destroy-method="dispose" />
     
     <bean id="workItemHandler" class="org.wiredwidgets.cow.server.manager.WorkItemHandlerFactory" factory-method="createInstance" c:session-ref="kSession"  />
-  
-<!--     <bean id="kSessionManager" class="org.wiredwidgets.cow.server.manager.KnowledgeSessionManager" init-method="init"> -->
-<!--         <property name="kSession" ref="kSession" /> -->
-<!--     </bean> -->
-    
+     
     <!--<bean id="testJBPMEventListener" class="org.wiredwidgets.cow.server.listener.TestJBPMEventListener">
         <property name="sessionProcessListener" ref="kSession" />
     </bean>-->
@@ -241,14 +212,7 @@
     <bean id="xmlStringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter" >
         <property name="supportedMediaTypes" value="application/xml" />
     </bean>
-    
-    <!-- Custom Service classes -->
-    <!--<bean id="service" class="org.wiredwidgets.cow.server.service.ProcessServiceImpl" />
-    <bean id="processInstanceService" class="org.wiredwidgets.cow.server.service.ProcessInstanceServiceImpl" />
-    <bean id="processDefinitionsService" class="org.wiredwidgets.cow.server.service.ProcessDefinitionsServiceImpl" />
-    <bean id="taskService" class="org.wiredwidgets.cow.server.service.TaskServiceImpl" />-->
-    <bean id="usersService" class="org.wiredwidgets.cow.server.service.UsersServiceImpl" />
-    
+       
     <!-- Instance of RestTemplate, used by RestServiceInvoker -->
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" >
         <property name="messageConverters">
@@ -260,54 +224,9 @@
             </util:list>
         </property>
     </bean>
-    
-    <context:component-scan base-package="org.wiredwidgets.cow.server.service, org.wiredwidgets.cow.server.transform" />
-    
-    <bean id="activityBuilderFactoryFactory" class="org.wiredwidgets.cow.server.transform.v2.ActivityBuilderFactoryFactory">
-        <property name="factories">
-            <util:list>
-                <!-- BypassableActivityBuilder is first, as any subtype may be bypassable -->
-                <bean class="org.wiredwidgets.cow.server.transform.v2.BypassableActivityBuilderFactory" />               
-                <bean class="org.wiredwidgets.cow.server.transform.v2.GatewayDecisionActivityBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.GatewayLoopActivityBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.ParallelSetActivityBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.ComplexSetActivityBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.SequentialSetActivityBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.TaskActivityBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.ServiceTaskActivityBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.SubProcessActivityBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.ExitActivityBuilderFactory" />
-            </util:list>
-        </property>
-    </bean>
-    
-    <bean id="nodeBuilderFactoryFactory" class="org.wiredwidgets.cow.server.transform.v2.NodeBuilderFactoryFactory">
-        <property name="factories">
-            <util:set>
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20UserTaskNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DecisionUserTaskNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20LoopDecisionUserTaskNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ServiceTaskNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20SubProcessNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ExitNodeBuilderFactory" />
-
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DivergingParallelGatewayNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DivergingExclusiveGatewayNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20DivergingComplexGatewayNodeBuilderFactory" />
-     
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ConvergingParallelGatewayNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ConvergingExclusiveGatewayNodeBuilderFactory" />
-                <bean class="org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ConvergingComplexGatewayNodeBuilderFactory" />
-            </util:set>
-        </property>
-    </bean>     
-    
+        
     <!-- Spring Data JPA -->
     <jpa:repositories base-package="org.wiredwidgets.cow.server.repo"
     	entity-manager-factory-ref="emf" transaction-manager-ref="txManager" />
     
-    
- 
-<!--     <bean id="testHumanVars" class="org.wiredwidgets.cow.server.test.TestHumanVars" /> -->
-
 </beans>

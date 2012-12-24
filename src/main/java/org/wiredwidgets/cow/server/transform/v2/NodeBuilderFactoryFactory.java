@@ -23,7 +23,9 @@ package org.wiredwidgets.cow.server.transform.v2;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.log4j.Logger;
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
 /**
@@ -31,6 +33,7 @@ import org.wiredwidgets.cow.server.api.model.v2.Activity;
  * Calls the supports() method of each factory in turn
  * @author JKRANES
  */
+@Component
 public class NodeBuilderFactoryFactory {
 
     private static Logger log = Logger.getLogger(NodeBuilderFactoryFactory.class);
@@ -71,6 +74,10 @@ public class NodeBuilderFactoryFactory {
      */
     public Set<NodeBuilderFactory> getFactories() {
         return factories;
+    }
+    
+    public void addFactory(NodeBuilderFactory factory) {
+    	factories.add(factory);
     }
 
     /**

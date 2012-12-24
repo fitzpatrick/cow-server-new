@@ -43,14 +43,12 @@ import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
  *
  * @author JKRANES
  */
-public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, Task> {
+public class Bpmn20UserTaskNodeBuilder extends Bpmn20ActivityNodeBuilder<TUserTask, Task> {
 	
 	public static String TASK_INPUT_VARIABLES_NAME = "Variables";
 	public static String TASK_OUTPUT_VARIABLES_NAME = "Variables";
     
-    private IoSpecification ioSpec = new IoSpecification();
-    private InputSet inputSet = new InputSet();
-    private OutputSet outputSet = new OutputSet();
+
     // private static QName SOURCE_REF_QNAME = new QName("http://www.omg.org/spec/BPMN/20100524/MODEL","sourceRef");
 
     public Bpmn20UserTaskNodeBuilder(ProcessContext context, Task task) {
@@ -113,89 +111,6 @@ public class Bpmn20UserTaskNodeBuilder extends Bpmn20FlowNodeBuilder<TUserTask, 
         t.getResourceRoles().add(factory.createPotentialOwner(owner));       
     }
   
-    private String getInputRefName(String name) {
-        return getNode().getId() + "_" + name + "Input"; // JBPM naming convention
-    }
-    
-    protected void addDataInput(String name, String value) {     
-        assignInputValue(addDataInput(name), value);
-    }
-    
-    protected void addDataInput(String name,  Property value) {
-    	assignInputValue(addDataInput(name), value);
-    }
-       
-    protected DataInput addDataInput(String name) {
-        DataInput dataInput = new DataInput();
-        dataInput.setId(getInputRefName(name));
-        dataInput.setName(name); 
-        ioSpec.getDataInputs().add(dataInput);
-        inputSet.getDataInputRefs().add(factory.createInputSetDataInputRefs(dataInput));  
-        return dataInput;
-    }
-    
-    /**
-     * Create a new DataOutput linked to a new process level variable
-     * @param name
-     * @param addProcessVar true 
-     * @return
-     */
-    protected DataOutput addDataOutput(String name, String processVarName) {	
-    	return addDataOutput(name, getContext().addProcessVariable(processVarName, "String"));
-    } 
-    
-    protected DataOutput addDataOutput(String name, Property prop) {
-        DataOutput dataOutput = new DataOutput();
-        String id = getNode().getId() + "_" + name + "Output"; // JBPM naming convention
-        dataOutput.setId(id);
-        dataOutput.setName(name); 
-        ioSpec.getDataOutputs().add(dataOutput);
-        outputSet.getDataOutputRefs().add(factory.createOutputSetDataOutputRefs(dataOutput)); 
-        
-        DataOutputAssociation doa = new DataOutputAssociation();
-        getNode().getDataOutputAssociations().add(doa);
-        
-        // This part is not at all obvious. Determined correct approach by unmarshalling sample BPMN2 into XML
-        // and then examining the java objects
-        
-        doa.getSourceReves().add(factory.createTDataAssociationSourceRef(dataOutput));
-        doa.setTargetRef(prop);
-  
-        return dataOutput;    	
-    }
-    
-    
-    
-    /**
-     * Follows JBPM naming conventions
-     * @param name
-     * @param value 
-     */
-    protected void assignInputValue(DataInput dataInput, String value) {
-        DataInputAssociation dia = new DataInputAssociation();
-        getNode().getDataInputAssociations().add(dia);
-        dia.setTargetRef(dataInput);
 
-        Assignment assignment = new Assignment();
-        
-        TFormalExpression tfeFrom = new TFormalExpression();
-        tfeFrom.getContent().add(value);
-        assignment.setFrom(tfeFrom);
-              
-        TFormalExpression tfeTo = new TFormalExpression();
-        tfeTo.getContent().add(dataInput.getId());
-        assignment.setTo(tfeTo);
-        
-        dia.getAssignments().add(assignment); 
-    }   
-    
-    
-    protected void assignInputValue(DataInput dataInput, Property prop) {
-        DataInputAssociation dia = new DataInputAssociation();
-        getNode().getDataInputAssociations().add(dia);
-        dia.setTargetRef(dataInput);     
-        JAXBElement<Object> ref = factory.createTDataAssociationSourceRef(prop);
-        dia.getSourceReves().add(ref);
-    }     
     
 }

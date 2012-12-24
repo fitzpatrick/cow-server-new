@@ -20,14 +20,15 @@ import org.jbpm.process.audit.JPAProcessInstanceDbLog;
 import org.jbpm.process.audit.ProcessInstanceLog;
 import org.jbpm.process.audit.VariableInstanceLog;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 
 /**
  *
  * @author FITZPATRICK
  */
-public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverter implements Converter<ProcessInstanceLog, ProcessInstance>{
+@Component
+public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverter<ProcessInstanceLog, ProcessInstance>{
 	
     @Autowired
     protected StatefulKnowledgeSession kSession;	
@@ -41,8 +42,8 @@ public class JbpmProcessInstanceLogToSc2ProcessInstance extends AbstractConverte
         // for compatibility with REST API, preserve the JBPM 4.x convention
         // where the process instance ID = processID + "." + id
         target.setId(source.getProcessId() + "." + Long.toString(source.getProcessInstanceId()));
-        target.setStartTime(this.getConverter().convert(source.getStart(), XMLGregorianCalendar.class));
-        target.setEndTime(this.getConverter().convert(source.getEnd(), XMLGregorianCalendar.class));
+        target.setStartTime(convert(source.getStart(), XMLGregorianCalendar.class));
+        target.setEndTime(convert(source.getEnd(), XMLGregorianCalendar.class));
         
         switch (source.getStatus()) {
         	case STATE_ABORTED :
