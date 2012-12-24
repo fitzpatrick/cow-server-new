@@ -15,5 +15,5 @@ public interface TaskRepository extends CrudRepository<Task, Long> {
 	
 	public List<Task> findByTaskDataActualOwnerAndTaskDataCompletedOnBetween(User owner, Date start, Date end);
 	
-
+        public Task findById(Long id);
 }

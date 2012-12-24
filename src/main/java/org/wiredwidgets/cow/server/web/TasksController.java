@@ -39,6 +39,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.wiredwidgets.cow.server.listener.AmqpNotifier;
 // import org.wiredwidgets.cow.server.test.TestHumanVars;
 import org.wiredwidgets.cow.server.service.TaskService;
 import org.wiredwidgets.cow.server.service.TaskServiceImpl;
@@ -58,6 +59,8 @@ public class TasksController {
     TaskService taskService;
     @Autowired
     protected HashMap userGroups;
+    @Autowired
+    AmqpNotifier amqpNotifier;
     
     // @Autowired
     // protected MinaHTWorkItemHandler minaWorkItemHandler;
@@ -154,7 +157,7 @@ public class TasksController {
             response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
 
             //Task t = taskService.getTask(id);
-            //amqpNotifier.amqpTaskPublish(t, "process", "TaskCompleted", id);
+            amqpNotifier.amqpTaskPublish(task, "process", "TaskCompleted", id);
         }
     }
 
@@ -181,8 +184,8 @@ public class TasksController {
         }
         response.setStatus(HttpServletResponse.SC_NO_CONTENT); // 204
 
-        //Task t = taskService.getTask(id);
-        //amqpNotifier.amqpTaskPublish(t, "process", "TaskTaken", id);*/
+        Task task = taskService.getTask(Long.valueOf(id));
+        amqpNotifier.amqpTaskPublish(task, "process", "TaskTaken", id);
     }
 
     /**
