@@ -165,7 +165,7 @@ public class TasksController {
 
             //Task t = taskService.getTask(id);
             amqpNotifier.amqpTaskPublish(task, "process", "TaskCompleted", id);
-        }
+        
     }
 
     /**
