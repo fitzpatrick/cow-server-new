@@ -108,7 +108,7 @@ public class Bpmn20ProcessBuilder extends AbstractProcessBuilder<Definitions> {
 	        gatewayBuilder.build(null);
 	        // context.setProcessExitBuilder(gatewayBuilder); 
 	        
-	        Builder signalEventBuilder = new Bpmn20SignalEventNodeBuilder(context, source.getActivity().getValue());
+	        Builder signalEventBuilder = new Bpmn20SignalEventNodeBuilder(context, null);
 	        signalEventBuilder.build(null);
 	        signalEventBuilder.link(gatewayBuilder);           
         }

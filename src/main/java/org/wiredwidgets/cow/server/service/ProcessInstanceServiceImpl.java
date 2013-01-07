@@ -152,6 +152,11 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     public boolean updateProcessInstance(ProcessInstance instance) {
         return false;//throw new UnsupportedOperationException("Not supported yet.");
     }
+    
+    @Override
+	public void signalProcessInstance(long id, String signal, String value) {
+    	kSession.signalEvent(signal, value, id);
+    }
 
 	@Override
     public Process getProcessInstanceStatus(Long processInstanceId) {

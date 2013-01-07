@@ -244,6 +244,15 @@ public class ProcessInstancesController extends CowServerController{
         return processInstanceService.getProcessInstanceStatus(ext);
     }
     
+    
+    @RequestMapping(value = "/active/{id}.{ext}", method = POST, params="signal")
+    public void signalProcessInstance(@PathVariable String id, @PathVariable long ext, 
+    			@RequestParam String signal, @RequestParam String value, HttpServletResponse response) {
+    	
+    	processInstanceService.signalProcessInstance(ext, signal, value);
+    	response.setStatus(SC_NO_CONTENT);
+    }
+    
     /**
      * Update an active process instance.  Only Priority and Variables will be updated.
      * @param pi
@@ -251,8 +260,8 @@ public class ProcessInstancesController extends CowServerController{
      * @param ext
      * @param response
      */
-    @RequestMapping(value = "/active/{id}.{ext}", method = POST)
-    public void updateProcessInstance(@RequestBody org.wiredwidgets.cow.server.api.service.ProcessInstance pi, @PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
+    @RequestMapping(value = "/active/{id}.{ext}", method = POST, params="!signal")
+    public void updateProcessInstance(@RequestBody ProcessInstance pi, @PathVariable("id") String id, @PathVariable("ext") String ext, HttpServletResponse response) {
         // use ID of the URL
         /*pi.setId(decode(id) + "." + ext);
         if (processInstanceService.updateProcessInstance(pi)) {

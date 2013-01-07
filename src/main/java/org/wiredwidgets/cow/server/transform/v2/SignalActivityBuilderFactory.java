@@ -21,14 +21,23 @@
 
 package org.wiredwidgets.cow.server.transform.v2;
 
+import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Signal;
+
 /**
- * Logical node types independent of notation system
+ *
  * @author JKRANES
  */
-public enum NodeType {
+@Component
+public class SignalActivityBuilderFactory extends ActivityBuilderFactory<Signal> {
+    
+    public SignalActivityBuilderFactory() {
+        super(Signal.class, null);
+    }
 
-    START, END, TASK, DECISION_TASK, LOOP_TASK, SERVICE_TASK, DIVERGING_PARALLEL_GATEWAY, CONVERGING_PARALLEL_GATEWAY,
-    DIVERGING_EXCLUSIVE_GATEWAY, CONVERGING_EXCLUSIVE_GATEWAY,
-    DIVERGING_COMPLEX_GATEWAY, CONVERGING_COMPLEX_GATEWAY, EXIT, SUBPROCESS, SIGNAL
+    @Override
+    public SignalActivityBuilder createActivityBuilder(ProcessContext context, Signal activity) {
+        return new SignalActivityBuilder(context, activity, this);
+    }
 
 }

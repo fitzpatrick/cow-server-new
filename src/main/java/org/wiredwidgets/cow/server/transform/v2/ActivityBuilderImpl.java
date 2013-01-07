@@ -26,15 +26,15 @@ public abstract class ActivityBuilderImpl<T extends Activity> extends AbstractBu
 
     private T activity;
     private Builder linkTarget = null;
-    private ActivityBuilderFactory factory;
+    private ActivityBuilderFactory<T> factory;
 
-    public ActivityBuilderImpl(ProcessContext context, T activity, ActivityBuilderFactory factory) {
+    public ActivityBuilderImpl(ProcessContext context, T activity, ActivityBuilderFactory<T> factory) {
         super(context);
         this.activity = activity;
         this.factory = factory;
     }
 
-    public ActivityBuilderFactory getFactory() {
+    public ActivityBuilderFactory<T> getFactory() {
         return factory;
     }
     

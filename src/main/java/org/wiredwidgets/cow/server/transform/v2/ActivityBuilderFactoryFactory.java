@@ -80,7 +80,9 @@ public class ActivityBuilderFactoryFactory {
      * @return
      */
     public ActivityBuilder createActivityBuilder(ProcessContext context, Activity activity) {
-        return getActivityBuilderFactory(activity, context.getClass()).createActivityBuilder(context, activity);
+    	ActivityBuilderFactory factory = getActivityBuilderFactory(activity, context.getClass());
+    	return factory.createActivityBuilder(context, activity);
+        // return getActivityBuilderFactory(activity, context.getClass()).createActivityBuilder(context, activity);
     }
 
 }

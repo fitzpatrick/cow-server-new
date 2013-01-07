@@ -28,32 +28,47 @@ import org.omg.spec.bpmn._20100524.model.OutputSet;
 import org.omg.spec.bpmn._20100524.model.Property;
 import org.omg.spec.bpmn._20100524.model.TIntermediateCatchEvent;
 import org.omg.spec.bpmn._20100524.model.TSignalEventDefinition;
-import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import org.wiredwidgets.cow.server.api.model.v2.Signal;
 import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
 /**
  *
  * @author JKRANES
  */
-public class Bpmn20SignalEventNodeBuilder extends Bpmn20FlowNodeBuilder<TIntermediateCatchEvent, Activity> {
+public class Bpmn20SignalEventNodeBuilder extends Bpmn20FlowNodeBuilder<TIntermediateCatchEvent, Signal> {
 	
-
-    public Bpmn20SignalEventNodeBuilder(ProcessContext context, Activity activity) {
+    public Bpmn20SignalEventNodeBuilder(ProcessContext context, Signal activity) {
         super(context, new TIntermediateCatchEvent(), activity);
     }
 
     @Override
     protected void buildInternal() {
+    	
+    	Signal signal = getActivity();
+    	String eventType = null;
 
-        getNode().setId(getContext().generateId("_")); // JBPM ID naming convention uses underscore prefix + sequence                
-        getNode().setName("Signal");
+        getNode().setId(getContext().generateId("_")); // JBPM ID naming convention uses underscore prefix + sequence
+
+        Property outputVariableProperty = null;
+        if (signal == null) {
+        	// special case when called from Bpmn20ProcessBuilder
+        	eventType = "exit";
+        	outputVariableProperty = getContext().getProcessVariable(Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY);
+        }
+        else {
+        	eventType = signal.getSignalId();
+        	String varName = "signal_" + eventType;
+        	// adds a new process variable to hold the output of the signal event
+        	outputVariableProperty = getContext().addProcessVariable(varName, "string");
+        }        
+        
+        getNode().setName("Signal:" + eventType);
         // source.setKey(t.getId());
-                  
-        Property exitProperty = getContext().getProcessVariable(Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY);
-        addDataOutput("event", exitProperty);
+        
+        addDataOutput("event", outputVariableProperty);
         
         TSignalEventDefinition def = factory.createTSignalEventDefinition();
-        def.setSignalRef(new QName("exit"));
+        def.setSignalRef(new QName(eventType));
         getNode().getEventDefinitions().add(factory.createSignalEventDefinition(def));
 
     }

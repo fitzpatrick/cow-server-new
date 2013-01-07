@@ -63,8 +63,6 @@ public class NodeBuilderFactoryFactory {
      * @return the NodeBuilder.
      */
     public NodeBuilder createNodeBuilder(ProcessContext context, NodeType nodeType, Activity activity) {
-        if (activity != null) {
-        }
         return getNodeBuilderFactory(context.getClass(), nodeType).createNodeBuilder(context, activity);
     }
 

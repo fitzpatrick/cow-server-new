@@ -75,5 +75,7 @@ public interface ProcessInstanceService {
 
     List<ProcessInstance> findHistoryProcessInstances(String key, Date endedAfter, boolean ended);
 
+	public void signalProcessInstance(long id, String signal, String value);
+
 
 }

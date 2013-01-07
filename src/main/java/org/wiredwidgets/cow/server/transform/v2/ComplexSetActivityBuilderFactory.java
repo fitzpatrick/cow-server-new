@@ -23,6 +23,7 @@ package org.wiredwidgets.cow.server.transform.v2;
 
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
+import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
 /**
  *

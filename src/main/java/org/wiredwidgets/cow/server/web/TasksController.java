@@ -14,6 +14,11 @@
  */
 package org.wiredwidgets.cow.server.web;
 
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_CREATED;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static javax.servlet.http.HttpServletResponse.SC_NO_CONTENT;
+
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
@@ -21,7 +26,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import static javax.servlet.http.HttpServletResponse.*;
 
 import org.apache.log4j.Logger;
 import org.drools.runtime.StatefulKnowledgeSession;
@@ -40,9 +44,9 @@ import org.wiredwidgets.cow.server.api.service.HistoryTasks;
 import org.wiredwidgets.cow.server.api.service.Participations;
 import org.wiredwidgets.cow.server.api.service.Task;
 import org.wiredwidgets.cow.server.api.service.Tasks;
+import org.wiredwidgets.cow.server.listener.AmqpNotifier;
 import org.wiredwidgets.cow.server.service.TaskService;
 //import org.wiredwidgets.cow.server.rss.FeedFromTaskList;
-import org.wiredwidgets.cow.server.listener.AmqpNotifier;
 // import org.wiredwidgets.cow.server.test.TestHumanVars;
 
 /**

@@ -93,7 +93,7 @@ public abstract class ActivityBuilderFactory<T extends Activity> implements Init
      * @param activity
      * @return
      */
-    public abstract ActivityBuilder<T> createActivityBuilder(ProcessContext context, T activity);
+    public abstract ActivityBuilder createActivityBuilder(ProcessContext context, T activity);
 
     /**
      * Obtains the appropriate NodeBuilderFactory instance from the NodeBuilderFactoryFactory based on the parameters, 
