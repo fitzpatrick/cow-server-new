@@ -35,7 +35,7 @@
         <dependency>
             <groupId>org.wiredwidgets</groupId>
             <artifactId>cow-server-api</artifactId>
-            <version>0.5.3</version>
+            <version>0.5.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
