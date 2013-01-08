@@ -69,7 +69,7 @@ public interface ProcessInstanceService {
      * set according to the current state of the process instance.
      * 	
      */
-    Process getProcessInstanceStatus(Long processInstanceId);
+    ProcessInstance getProcessInstanceStatus(Long processInstanceId);
     
     List<ProcessInstance> findAllHistoryProcessInstances();
 

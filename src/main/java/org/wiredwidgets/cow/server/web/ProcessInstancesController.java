@@ -240,7 +240,7 @@ public class ProcessInstancesController extends CowServerController{
      */
     @RequestMapping("/active/{id}.{ext}/status")
     @ResponseBody
-    public org.wiredwidgets.cow.server.api.model.v2.Process getProcessInstanceStatus(@PathVariable("id") String id, @PathVariable("ext") Long ext, HttpServletResponse response) {
+    public ProcessInstance getProcessInstanceStatus(@PathVariable("id") String id, @PathVariable("ext") Long ext, HttpServletResponse response) {
         return processInstanceService.getProcessInstanceStatus(ext);
     }
     

@@ -159,7 +159,7 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     }
 
 	@Override
-    public Process getProcessInstanceStatus(Long processInstanceId) {
+    public ProcessInstance getProcessInstanceStatus(Long processInstanceId) {
 		ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(processInstanceId);
 		String exitValue = getProcessInstanceVariable(processInstanceId, PROCESS_EXIT_PROPERTY);
 		Process process = processService.getV2Process(pil.getProcessId());
@@ -168,7 +168,10 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 				process, 
 				new History(taskService.getHistoryActivities(processInstanceId), pil.getStatus(), exitValue))
 				.evaluate();
-        return process;
+		
+		ProcessInstance pi = getProcessInstance(processInstanceId);
+		pi.setProcess(process);
+        return pi;
     }
 
     @Override
