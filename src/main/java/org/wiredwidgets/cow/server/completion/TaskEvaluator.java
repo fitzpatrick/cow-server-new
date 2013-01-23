@@ -19,20 +19,35 @@ import java.util.List;
 
 import javax.xml.datatype.DatatypeConstants;
 
+import org.apache.log4j.Logger;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 
 @Component
+@Scope("prototype")
 public class TaskEvaluator extends AbstractEvaluator<Task> {
+	
+	private static Logger log = Logger.getLogger(TaskEvaluator.class);
 
     private List<HistoryActivity> historyActivities;
 
     @Override
     protected void evaluateInternal() {
-        this.historyActivities = history.getActivities(activity.getKey());
-        // this.percentComplete = calcPercentComplete();
+        this.historyActivities = info.getActivities(activity.getKey());
         this.completionState = getCompletionState();
+        
+        // needed for the summary
+        activity.setCompletionState(this.completionState.getName());
+        
+        if  (activity.getAssignee() != null) {
+        	info.updateUserSummary(activity.getAssignee(), activity);
+        }
+        else {
+        	info.updateGroupSummary(activity.getCandidateGroups(), activity);
+        }
+        
     }
 
     private CompletionState getCompletionState() {
@@ -40,7 +55,8 @@ public class TaskEvaluator extends AbstractEvaluator<Task> {
         // Because of possible looping structures, there may be more than once instance of a task activity
         
         if (historyActivities.isEmpty()) {
-            return CompletionState.NOT_STARTED;
+        	log.debug("No history for task, returning branch state: " + branchState.getName());
+            return branchState;
         } else {
             boolean isCompleted = true;
             for (HistoryActivity historyActivity : historyActivities) {
@@ -64,6 +80,7 @@ public class TaskEvaluator extends AbstractEvaluator<Task> {
                     }
                 }
             }
+            
             return (isCompleted ? CompletionState.COMPLETED : CompletionState.OPEN);
         }
     }

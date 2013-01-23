@@ -17,45 +17,77 @@
 package org.wiredwidgets.cow.server.completion;
 
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Decision;
 import org.wiredwidgets.cow.server.api.model.v2.Option;
+import org.wiredwidgets.cow.server.api.model.v2.Task;
+import static org.wiredwidgets.cow.server.completion.CompletionState.*;
 
 @Component
+@Scope("prototype")
 public class DecisionEvaluator extends AbstractEvaluator<Decision> {
 
     @Override
     protected void evaluateInternal() {
+    	
+    	Task decisionTask = activity.getTask();
+    	   	
+        // first, evaluate the decision task
+        evaluate(this.activity.getTask());      
+        CompletionState decisionTaskCompletionState = CompletionState.forName(decisionTask.getCompletionState());
+          
+        switch(decisionTaskCompletionState) {
+        	case PLANNED :
+        		completionState = PLANNED;
+        		branchState = CONTINGENT;
+        		evaluateBranches();
+        		break;
+        	case PRECLUDED :
+        		completionState = PRECLUDED;
+        		evaluateBranches();
+        		break;
+        	case OPEN :
+        		completionState = OPEN;
+        		branchState = CONTINGENT;
+        		evaluateBranches();
+        		break;
+        	case CONTINGENT :
+        		completionState = CONTINGENT;
+        		branchState = CONTINGENT;
+        		evaluateBranches();
+        		break;
+        	case COMPLETED :
+        		String choice = getChosenOption();
+        		boolean isCompleted = true; // until we discover otherwise
+                for (Option option : activity.getOptions()) {
+                	if (option.getName().equals(choice)) {
+                		branchState = PLANNED;
+                	}
+                	else {
+                		branchState = PRECLUDED;
+                	}
+                    evaluate(option.getActivity().getValue());
+                    
+                    if (CompletionState.forName(option.getActivity().getValue().getCompletionState()) == CompletionState.OPEN) {
+                        isCompleted = false;
+                    }
 
-        // first, evaluate the decision task and all the option paths
-        // this ensures all objects are initialized with some completion status
-        evaluate(this.activity.getTask());
+                }
+                completionState = (isCompleted ? CompletionState.COMPLETED : OPEN);
+                break;
+        }
+	
+    }
+    
+    private void evaluateBranches() {
         for (Option option : activity.getOptions()) {
             evaluate(option.getActivity().getValue());
         }
-
-        CompletionState decisionTaskCompletionState = CompletionState.forName(this.activity.getTask().getCompletionState());
-        if (decisionTaskCompletionState == CompletionState.NOT_STARTED) {
-            // the decision task has not been reached in the workflow
-            completionState = CompletionState.NOT_STARTED;
-        }
-        else if (decisionTaskCompletionState == CompletionState.OPEN) {
-            completionState = CompletionState.OPEN;
-        }
-        else {
-            // The decision is complete and we are in one of the OPTION branches
-            // at a minimum, the status is OPEN
-            // assume COMPLETED until we determine otherwise.  If we determine that status is OPEN,
-            // we can break from the loop.
-            boolean isCompleted = true;
-            // check the options.  If at least one is OPEN then the decision is OPEN, else it is COMPLETED
-            for (Option option : activity.getOptions()) {
-                if (CompletionState.forName(option.getActivity().getValue().getCompletionState()) == CompletionState.OPEN) {
-                    isCompleted = false;
-                    break;
-                }
-            } // end for
-            completionState = (isCompleted ? CompletionState.COMPLETED : CompletionState.OPEN);
-        }
+    }
+    
+    private String getChosenOption() {
+    	String varName = activity.getTask().getKey() + "_decision";
+    	return info.getVariables().get(varName);
     }
 }

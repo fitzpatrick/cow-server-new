@@ -20,12 +20,14 @@ package org.wiredwidgets.cow.server.completion;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.SubProcess;
 import org.wiredwidgets.cow.server.api.service.ProcessInstance;
 import org.wiredwidgets.cow.server.service.ProcessInstanceService;
 
 @Component
+@Scope("prototype")
 public class SubProcessEvaluator extends AbstractEvaluator<SubProcess> {
     
     @Autowired
@@ -62,6 +64,6 @@ public class SubProcessEvaluator extends AbstractEvaluator<SubProcess> {
         }
         
         // not completed, not open, must be not started
-        return CompletionState.NOT_STARTED;
+        return branchState;
     }
 }

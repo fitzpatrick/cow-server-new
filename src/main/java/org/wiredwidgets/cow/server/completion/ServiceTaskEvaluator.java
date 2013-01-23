@@ -18,18 +18,20 @@ package org.wiredwidgets.cow.server.completion;
 
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.ServiceTask;
 import org.wiredwidgets.cow.server.api.service.HistoryActivity;
 
 @Component
+@Scope("prototype")
 public class ServiceTaskEvaluator extends AbstractEvaluator<ServiceTask> {
 
     private List<HistoryActivity> historyActivities;
 
     @Override
     protected void evaluateInternal() {
-        this.historyActivities = history.getActivities(activity.getKey());
+        this.historyActivities = info.getActivities(activity.getKey());
         this.completionState = getCompletionState();
     }
 
@@ -37,7 +39,7 @@ public class ServiceTaskEvaluator extends AbstractEvaluator<ServiceTask> {
 
         // Because of possible looping structures, there may be more than once instance of a task activity
         if (historyActivities.isEmpty()) {
-            return CompletionState.NOT_STARTED;
+            return branchState;
         }
         else {
             boolean isCompleted =  true;

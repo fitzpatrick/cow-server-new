@@ -17,17 +17,19 @@
 package org.wiredwidgets.cow.server.completion;
 
 import org.drools.runtime.process.ProcessInstance;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
 
 @Component
+@Scope("prototype")
 public class ProcessEvaluator extends AbstractEvaluator<Activity> {
 	
 	@Override
 	protected void evaluateInternal() {
 		evaluate(super.activity);
                 // process completion state is same as activity
-                if (history.getProcessInstanceState() == ProcessInstance.STATE_ACTIVE) {
+                if (info.getProcessInstanceState() == ProcessInstance.STATE_ACTIVE) {
                     setCompletionState(super.activity.getCompletionState());
                 }
                 else {
