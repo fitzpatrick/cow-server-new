@@ -71,7 +71,8 @@ public class RestServiceTaskHandler implements WorkItemHandler {
                 
                  
                 // update the result variable, if specified
-                if (var != null && result != null) {                      
+                //if (var != null && result != null) {   
+                if (var != null && !var.trim().equals("") && result != null && !result.trim().equals("")){   
                     WorkflowProcessInstance pi = (WorkflowProcessInstance)kSession.getProcessInstance(item.getProcessInstanceId());                    
                     pi.setVariable(var, result); 
                     //executionService.setVariable(execution.getId(), var, result);
