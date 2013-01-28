@@ -14,21 +14,25 @@
  * See the License for the specific language governing permissions and limitations under the License.
  */
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package org.wiredwidgets.cow.server.transform.v2;
 
+import org.wiredwidgets.cow.server.api.model.v2.Script;
+
 /**
- * Logical node types independent of notation system
+ *
  * @author JKRANES
  */
-public enum NodeType {
+public class ScriptActivityBuilder extends ActivityBuilderImpl<Script> {
+    
+    public ScriptActivityBuilder(ProcessContext context, Script script, ScriptActivityBuilderFactory factory) {
+        super(context, script, factory);
+    }
 
-    START, END, TASK, DECISION_TASK, LOOP_TASK, SERVICE_TASK, DIVERGING_PARALLEL_GATEWAY, CONVERGING_PARALLEL_GATEWAY,
-    DIVERGING_EXCLUSIVE_GATEWAY, CONVERGING_EXCLUSIVE_GATEWAY,
-    DIVERGING_COMPLEX_GATEWAY, CONVERGING_COMPLEX_GATEWAY, EXIT, SCRIPT, SUBPROCESS, SIGNAL
-
+    @Override
+    public void build() { 	
+        Builder builder = this.createNodeBuilder(getContext(), getActivity(), NodeType.SCRIPT);
+        builder.build(this);    	
+        setLinkTarget(builder); 
+        setLinkSource(builder); 
+    }
 }
