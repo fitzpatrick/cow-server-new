@@ -9,6 +9,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.xml.bind.JAXBElement;
 
 import org.apache.log4j.Logger;
 import org.jbpm.process.audit.JPAProcessInstanceDbLog;
@@ -18,8 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.wiredwidgets.cow.server.api.model.v2.Process;
-import org.wiredwidgets.cow.server.api.service.ProcessInstance;
+import org.wiredwidgets.cow.server.api.model.v2.*;
+import org.wiredwidgets.cow.server.api.model.v2.Task;
+import org.wiredwidgets.cow.server.api.service.*;
 import org.wiredwidgets.cow.server.api.service.Variable;
 import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
 import org.wiredwidgets.cow.server.completion.History;
@@ -44,6 +46,9 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     
     @Autowired
     TaskService taskService;
+    
+    @Autowired
+    UsersService userService;
     
     @Autowired
     EvaluatorFactory evaluatorFactory;
@@ -158,11 +163,11 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     	kSession.signalEvent(signal, value, id);
     }
 
-	@Override
+    @Override
     public ProcessInstance getProcessInstanceStatus(Long processInstanceId) {
 		ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(processInstanceId);
 		String exitValue = getProcessInstanceVariable(processInstanceId, PROCESS_EXIT_PROPERTY);
-		Process process = processService.getV2Process(pil.getProcessId());
+		org.wiredwidgets.cow.server.api.model.v2.Process process = processService.getV2Process(pil.getProcessId());
 		evaluatorFactory.getProcessEvaluator(
 				String.valueOf(processInstanceId), 
 				process, 
@@ -235,5 +240,5 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         }    	
         return value;
     }
-    
+   
 }

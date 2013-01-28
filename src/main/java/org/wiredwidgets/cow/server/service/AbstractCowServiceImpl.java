@@ -42,14 +42,11 @@ public class AbstractCowServiceImpl {
     @Autowired
     protected org.jbpm.task.service.TaskClient taskClient;
     
-    @Autowired
-    protected HashMap<String,List<String>> userGroups;
+   // @Autowired
+    //protected HashMap<String,List<String>> userGroups;
     
     @Autowired
     protected GenericHTWorkItemHandler workItemHandler;
-    
-    @Autowired
-    protected ArrayList<String> groups;
     
     //@Autowired
     //protected org.jbpm.task.service.TaskServiceSession jbpmTaskServiceSession;

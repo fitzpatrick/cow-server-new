@@ -4,16 +4,15 @@
  */
 package org.wiredwidgets.cow.server.manager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import org.apache.log4j.Logger;
 import org.jbpm.task.Group;
 import org.jbpm.task.User;
-import org.jbpm.task.identity.UserGroupCallbackManager;
 import org.jbpm.task.service.TaskService;
 import org.jbpm.task.service.TaskServiceSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.wiredwidgets.cow.server.helper.LDAPHelper;
 
 /**
  *
@@ -22,10 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager {
 
+    private static Logger log = Logger.getLogger(TaskServiceSessionManagerImpl.class);
+    
     TaskService jbpmTaskService;
     TaskServiceSession jbpmTaskServiceSession;
-    HashMap userGroups;
-    List groups;
+    LDAPHelper ldapHelper;
 
     @Override
     public void init() {
@@ -42,53 +42,40 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
     public void setjbpmTaskService(TaskService jbpmTaskService) {
         this.jbpmTaskService = jbpmTaskService;
     }
-
-    @Override
-    public HashMap getuserGroups() {
-        return userGroups;
-    }
-
-    @Override
-    public void setuserGroups(HashMap userGroups) {
-        this.userGroups = userGroups;
-    }
     
     @Override
-    public List getgroups(){
-        return groups;
+    public LDAPHelper getldapHelper() {
+        return ldapHelper;
     }
-    
+
     @Override
-    public void setgroups(List groups){
-        this.groups = groups;
+    public void setldapHelper(LDAPHelper ldapHelper) {
+        this.ldapHelper = ldapHelper;
     }
 
     private void addUserGroupToSession() {
-        List<String> allGroups = getAllGroups();
-        for (String group : allGroups) {
+        for (String group : ldapHelper.getLDAPGroups()/*getAllGroups()*/) {
             jbpmTaskServiceSession.addGroup(new Group(group));
-            groups.add(group);
         }
-        
-        for (String username : getDefaultUsers()) {
-            jbpmTaskServiceSession.addUser(new User(username));
-            
-            /*if (username != "Administrator") {
 
-                List<String> groupsForUser = getUserGroups(username);
-                for (String group : groupsForUser) {
-                    if (userGroups.containsKey(username)) {
-                        ((List) userGroups.get(username)).add(group);
-                    } else {
-                        List<String> values = new ArrayList<String>();
-                        values.add(group);
-                        userGroups.put(username, values);
-                    }
-                }
-            }*/
+        List <String> users = new ArrayList<String>();
+        for (String username : ldapHelper.getLDAPUsers()/*getDefaultUsers()*/) {
+            jbpmTaskServiceSession.addUser(new User(username));
+            users.add(username);
         }
-        
-        constructUserGroups();
+    }
+
+    /*private List<String> getAllGroups() {
+        List<String> allGroups = new ArrayList<String>();
+        allGroups.add("group1");
+        allGroups.add("SIDO");
+        allGroups.add("DT");
+        allGroups.add("DOC");
+        allGroups.add("DAC");
+        allGroups.add("COA");
+        allGroups.add("AM");
+
+        return allGroups;
     }
 
     private List<String> getDefaultUsers() {
@@ -100,45 +87,6 @@ public class TaskServiceSessionManagerImpl implements TaskServiceSessionManager 
         allUsers.add("matt");
         allUsers.add("prema");
         return allUsers;
-    }
+    }*/
 
-    private void constructUserGroups(){
-        userGroups.put("Administrator", getAllGroups());
-        userGroups.put("shawn", getAllGroups());
-        userGroups.put("lew", Arrays.asList("SIDO","DOC","DAC","AM"));
-        userGroups.put("jon", Arrays.asList("DT","COA"));
-        userGroups.put("matt", Arrays.asList("SIDO","COA"));
-        userGroups.put("prema", Arrays.asList("DT","DOC","DAC"));
-    }
-    
-    /*private List<String> getUserGroups(String username) {
-        if (!username.equals("Administrator")) {
-            List<String> groupsForUser = new ArrayList<String>();
-            groupsForUser.add("group1");
-            //groupsForUser.add("group2");
-            return groupsForUser;
-        }
-         * else if (username.equals("Administrator")){ List<String> groups = new
-         * ArrayList<String>(); groups.add("admin"); return groups;
-        }
-         */
-        //return null;
-    //}
-
-    private List<String> getAllGroups() {
-        List<String> allGroups = new ArrayList<String>();
-        allGroups.add("group1");
-        allGroups.add("SIDO");
-        allGroups.add("DT");
-        allGroups.add("DOC");
-        allGroups.add("DAC");
-        allGroups.add("COA");
-        allGroups.add("AM");
-        
-        /*
-         * groups.add("group2");
-        groups.add("admin");
-         */
-        return allGroups;
-    }
 }

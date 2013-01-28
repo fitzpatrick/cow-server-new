@@ -103,23 +103,22 @@
     
     <bean id="jbpmTaskService" class="org.jbpm.task.service.TaskService" c:emf-ref="emf" c:systemEventListener-ref="sel"/>
     
-    <bean id="userGroups" class="java.util.HashMap" />
+    <!--<bean id="userGroups" class="java.util.HashMap" />-->
     
-    <bean id="groups" class="java.util.ArrayList" />
-    
-    <bean id="userGroupCallback" class="org.wiredwidgets.cow.server.callback.DefaultUserGroupCallbackImpl" />
+    <!--<bean id="userGroupCallback" class="org.jbpm.task.identity.LDAPUserGroupCallbackImpl" />-->
     
     <bean id="taskServiceSessionManager" class="org.wiredwidgets.cow.server.manager.TaskServiceSessionManagerImpl" init-method="init" >
         <property name="jbpmTaskService" ref="jbpmTaskService" />
-        <property name="userGroups" ref="userGroups" />
-        <property name="groups" ref="groups" />
+        <property name="ldapHelper" ref="ldapHelper" />
+        <!--<property name="userGroups" ref="userGroups" />
+        <property name="groups" ref="groups" />-->
     </bean>
       
     <bean id="minaTaskServer" class="org.jbpm.task.service.mina.MinaTaskServer" c:service-ref="jbpmTaskService" destroy-method="stop" />
  
     <bean id="minaTaskServerManager" class="org.wiredwidgets.cow.server.manager.MinaTaskServerManager" init-method="init" >
         <property name="minaTaskServer" ref="minaTaskServer" />
-        <property name="userGroupCallback" ref="userGroupCallback" />
+        <!--<property name="userGroupCallback" ref="userGroupCallback" />-->
     </bean>
     
     <bean id="minaTaskClientHandler" class="org.jbpm.task.service.mina.MinaTaskClientHandler" c:systemEventListener-ref="sel"/>
@@ -158,14 +157,12 @@
     <bean id="logger" class="org.jbpm.process.audit.JPAWorkingMemoryDbLogger" c:session-ref="kSession" destroy-method="dispose" />
     
     <bean id="workItemHandler" class="org.wiredwidgets.cow.server.manager.WorkItemHandlerFactory" factory-method="createInstance" c:session-ref="kSession"  />
-     
-    <!--<bean id="testJBPMEventListener" class="org.wiredwidgets.cow.server.listener.TestJBPMEventListener">
-        <property name="sessionProcessListener" ref="kSession" />
-    </bean>-->
     
     <bean id="jpmnProcessEventListener" class="org.wiredwidgets.cow.server.listener.JbpmProcessEventListener">
         <property name="sessionProcessListener" ref="kSession" />
     </bean>
+    
+    <bean id="ldapHelper" class="org.wiredwidgets.cow.server.helper.LDAPHelper"/>
     
     <!-- AMQP integration -->
    	<bean id="amqpNotifier" class="org.wiredwidgets.cow.server.listener.AmqpNotifier" init-method="init" >

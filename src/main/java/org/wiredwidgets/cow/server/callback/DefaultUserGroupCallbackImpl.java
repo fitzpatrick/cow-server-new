@@ -15,8 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
  * @author FITZPATRICK
  */
 public class DefaultUserGroupCallbackImpl implements UserGroupCallback{
-    @Autowired
-    HashMap userGroups;
+    //@Autowired
+    //HashMap userGroups;
     
     @Override
     public boolean existsUser(String userId) {
@@ -30,11 +30,12 @@ public class DefaultUserGroupCallbackImpl implements UserGroupCallback{
 
     @Override
     public List<String> getGroupsForUser(String userId, List<String> groupIds, List<String> allExistingGroupIds) {
-        if (userGroups.containsKey(userId)){
+        /*if (userGroups.containsKey(userId)){
             return (List<String>)userGroups.get(userId);
         } else{
             return new ArrayList<String>();
-        }
+        }*/
+        return null;
     }
     
 }

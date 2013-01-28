@@ -13,7 +13,7 @@ import org.drools.runtime.StatefulKnowledgeSession;
  */
 public class JbpmProcessEventListener implements ProcessEventListener{
     
-    private static Logger log = Logger.getLogger(TestJBPMEventListener.class);
+    private static Logger log = Logger.getLogger(JbpmProcessEventListener.class);
 
     @Override
     public void beforeProcessStarted(ProcessStartedEvent event) {

@@ -31,9 +31,6 @@ public class TestHumanVars {
     protected org.jbpm.task.TaskService taskClient;
     
     @Autowired
-    protected HashMap userGroups;
-    
-    @Autowired
     protected MinaHTWorkItemHandler minaWorkItemHandler;
     
     public void testHumanVars(){

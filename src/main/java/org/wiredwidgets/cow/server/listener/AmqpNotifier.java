@@ -62,7 +62,7 @@ public class AmqpNotifier {
 			messageProducer = session.createProducer(destination);
 			initialized = true;
 		} catch (Exception e){
-			log.error(e.getMessage());
+			log.debug(e.getMessage());
 			initialized = false;
 		}
     }
@@ -84,7 +84,7 @@ public class AmqpNotifier {
 	            try {
 	                info = "eventType=" + eventName + ";" + "processID=" + task.getProcessInstanceId() + ";" + "taskID=" + task.getId() + ";" + "assignee=" + task.getAssignee() + ";";
 	            } catch (Exception e) {
-	                log.error(e.getMessage());
+	                log.debug(e.getMessage());
 	            }
 	        } else if (eventName.equals("TaskCompleted")) {
 	            try {
@@ -94,7 +94,7 @@ public class AmqpNotifier {
                         String assignee = ht.getTaskData().getActualOwner().getId();
                         info = "eventType=" + eventName + ";" + "processID=" + processName + "." + processId + ";" + "taskID=" + taskId + ";" + "assignee=" + assignee + ";";
 	            } catch (Exception e) {
-	                log.error(e.getMessage());
+	                log.debug(e.getMessage());
 	            }
 	        }
 	        sendMessage(info, exchangeName);
@@ -179,7 +179,7 @@ public class AmqpNotifier {
     	    textMessage = session.createTextMessage(message);
 			messageProducer.send(textMessage);
 		} catch (Exception e) {
-			log.error(e.getMessage());
+			log.debug(e.getMessage());
 			initialized = false;
 		} 
     }
