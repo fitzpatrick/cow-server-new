@@ -63,8 +63,6 @@ public class TasksController {
     @Autowired
     TaskService taskService;
     @Autowired
-    protected HashMap userGroups;
-    @Autowired
     AmqpNotifier amqpNotifier;
     
     // @Autowired
