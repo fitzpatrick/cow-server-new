@@ -34,7 +34,8 @@ public class EvaluatorFactory implements ApplicationContextAware {
 	
     private ApplicationContext applicationContext;
 
-    public Evaluator<? extends Activity> getEvaluator(String processInstanceId, Activity activity, History history) {
+    public Evaluator<? extends Activity> getEvaluator(String processInstanceId, Activity activity, ProcessInstanceInfo history, 
+    		CompletionState branchState, boolean inLoop) {
         Evaluator eval = null;
         if (activity.isBypassable() && !activity.isWrapped()) {
             eval = applicationContext.getBean(BypassableActivityEvaluator.class);
@@ -58,15 +59,18 @@ public class EvaluatorFactory implements ApplicationContextAware {
         eval.setProcessInstanceId(processInstanceId);
         eval.setActivity(activity);
         eval.setHistory(history);
+        eval.setBranchState(branchState);
+        eval.setInLoop(inLoop);
 
         return eval;
     }
     
-    public ProcessEvaluator getProcessEvaluator(String processInstanceId, Process process, History history) {
+    public ProcessEvaluator getProcessEvaluator(String processInstanceId, Process process, ProcessInstanceInfo history) {
         ProcessEvaluator eval = applicationContext.getBean(ProcessEvaluator.class);
         eval.setProcessInstanceId(processInstanceId);
         eval.setActivity(process.getActivity().getValue());
         eval.setHistory(history);
+        eval.setBranchState(CompletionState.PLANNED);
         return eval;
     }
 

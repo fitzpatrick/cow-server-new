@@ -18,11 +18,14 @@ package org.wiredwidgets.cow.server.completion;
 
 import javax.xml.bind.JAXBElement;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Activities;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import static org.wiredwidgets.cow.server.completion.CompletionState.*;
 
 @Component
+@Scope("prototype")
 public class ActivitiesEvaluator extends AbstractEvaluator<Activities> {
     
     @Override
@@ -35,15 +38,16 @@ public class ActivitiesEvaluator extends AbstractEvaluator<Activities> {
             Activity act = jbe.getValue();
             evaluate(act);
             CompletionState state = CompletionState.forName(act.getCompletionState());
-            if (state == CompletionState.COMPLETED) {
+            if (state == COMPLETED) {
                 completedCount++;
-            } else if (state == CompletionState.OPEN) {
-                openCount++;
+            } else if (state == OPEN) {
+                openCount++;    
             }
         }
-
+        
         if (completedCount == 0 && openCount == 0) {
-            completionState = CompletionState.NOT_STARTED;
+        	// have not yet reached this activity
+            completionState = branchState;
         }
         else if (activity.getMergeCondition() != null && activity.getMergeCondition().equals("1") && completedCount > 0 ) {
             // special case for 'race condition' sets where completion of of at least one

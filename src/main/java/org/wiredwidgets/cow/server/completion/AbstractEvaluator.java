@@ -19,6 +19,7 @@ import java.math.BigInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.wiredwidgets.cow.server.api.model.v2.Activity;
+import static org.wiredwidgets.cow.server.completion.CompletionState.*;
 
 public abstract class AbstractEvaluator<T extends Activity> implements Evaluator<T> {
 
@@ -26,16 +27,24 @@ public abstract class AbstractEvaluator<T extends Activity> implements Evaluator
     private EvaluatorFactory factory;
     
     protected T activity;
-    protected History history;
+    protected ProcessInstanceInfo info;
     protected int percentComplete;
     protected CompletionState completionState;
     protected String processInstanceId;
+    protected CompletionState branchState;
+    protected boolean inLoop = false;
 
     @Override
-    public void evaluate() {
-        evaluateInternal();
-        activity.setPercentComplete(BigInteger.valueOf((long) percentComplete));
-        activity.setCompletionState(completionState.getName());
+    public final void evaluate() {
+//    	if (branchState.equals(PRECLUDED) || branchState.equals(CONTINGENT)) {
+//    		// everything below this point is the same, 
+//    		activity.setCompletionState(branchState.getName());		
+//    	}
+//    	else {
+	        evaluateInternal();
+	        // activity.setPercentComplete(BigInteger.valueOf((long) percentComplete));
+	        activity.setCompletionState(completionState.getName());
+    	//}
     }
 
     /*
@@ -45,7 +54,7 @@ public abstract class AbstractEvaluator<T extends Activity> implements Evaluator
     protected abstract void evaluateInternal();
 
     protected final void evaluate(Activity activity) {
-        factory.getEvaluator(processInstanceId, activity, history).evaluate();
+        factory.getEvaluator(processInstanceId, activity, info, branchState, inLoop).evaluate();
     }
 
     protected final void setCompletionState(String name) {
@@ -58,12 +67,27 @@ public abstract class AbstractEvaluator<T extends Activity> implements Evaluator
     }
 
     @Override
-    public void setHistory(History history) {
-        this.history = history;
+    public void setHistory(ProcessInstanceInfo history) {
+        this.info = history;
     }
 
     @Override
     public void setProcessInstanceId(String processInstanceId) {
         this.processInstanceId = processInstanceId;
     }
+    
+    @Override
+    public void setBranchState(CompletionState branchState) {
+    	this.branchState = branchState;
+    }
+    
+    public void setInLoop(boolean inLoop) {
+    	this.inLoop = inLoop;
+    }
+    
+    public boolean isInLoop() {
+    	return inLoop;
+    }
+    
+    
 }

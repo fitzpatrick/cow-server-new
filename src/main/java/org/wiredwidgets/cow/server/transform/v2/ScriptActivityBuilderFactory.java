@@ -21,14 +21,23 @@
 
 package org.wiredwidgets.cow.server.transform.v2;
 
+import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Script;
+
 /**
- * Logical node types independent of notation system
+ *
  * @author JKRANES
  */
-public enum NodeType {
+@Component
+public class ScriptActivityBuilderFactory extends ActivityBuilderFactory<Script> {
+    
+    public ScriptActivityBuilderFactory() {
+        super(Script.class, null);
+    }
 
-    START, END, TASK, DECISION_TASK, LOOP_TASK, SERVICE_TASK, DIVERGING_PARALLEL_GATEWAY, CONVERGING_PARALLEL_GATEWAY,
-    DIVERGING_EXCLUSIVE_GATEWAY, CONVERGING_EXCLUSIVE_GATEWAY,
-    DIVERGING_COMPLEX_GATEWAY, CONVERGING_COMPLEX_GATEWAY, EXIT, SCRIPT, SUBPROCESS, SIGNAL
+    @Override
+    public ScriptActivityBuilder createActivityBuilder(ProcessContext context, Script activity) {
+        return new ScriptActivityBuilder(context, activity, this);
+    }
 
 }

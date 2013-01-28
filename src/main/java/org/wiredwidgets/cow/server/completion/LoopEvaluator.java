@@ -21,36 +21,57 @@
 
 package org.wiredwidgets.cow.server.completion;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Loop;
+import static org.wiredwidgets.cow.server.completion.CompletionState.*;
 
 /**
  *
  * @author JKRANES
  */
 @Component
+@Scope("prototype")
 public class LoopEvaluator extends AbstractEvaluator<Loop> {
 
     @Override
     protected void evaluateInternal() {
         evaluate(this.activity.getLoopTask());
         evaluate(this.activity.getActivity().getValue());
-
-        CompletionState loopActivityCompletionState = CompletionState.forName(this.activity.getActivity().getValue().getCompletionState());
+        
         CompletionState loopTaskCompletionState = CompletionState.forName(this.activity.getLoopTask().getCompletionState());
+        
+        switch (loopTaskCompletionState) {
+        	case OPEN:
+        		// waiting on the loop decision
+        		completionState = OPEN;
+        		break;
+        	case COMPLETED:
+        		// are we done or are we repeating the loop again?
+        		completionState = isRepeat() ? OPEN : COMPLETED;
+        		break;
+        	case PLANNED:
+        		completionState = CompletionState.forName(this.activity.getActivity().getValue().getCompletionState());
+        		
+        		if (completionState.equals(COMPLETED)) {
+        			// this is not realistic but code for it anyway
+        			// the activity is COMPLETED but decision task not yet OPEN for some reason?
+        			completionState = OPEN;
+        		}
+        		break;
+        	default:
+        		completionState = branchState;
+        		break;
+        				
+        }
 
-        if (loopActivityCompletionState == CompletionState.NOT_STARTED) {
-            completionState = CompletionState.NOT_STARTED;
-        }
-        else if (loopActivityCompletionState == CompletionState.OPEN) {
-            completionState = CompletionState.OPEN;
-        }
-        // the activity is complete, we may be waiting on the loop decision
-        else if(loopTaskCompletionState == CompletionState.COMPLETED) {
-            completionState = CompletionState.COMPLETED;
-        }
-        else {
-            completionState = CompletionState.OPEN;
-        }
+
     }
+    
+    private boolean isRepeat() {
+    	String varName = activity.getLoopTask().getKey() + "_decision";
+    	String decision = info.getVariables().get(varName);
+    	return decision == null ? false : decision.equals(activity.getRepeatName());
+    }
+    
 }

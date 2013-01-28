@@ -6,12 +6,12 @@ import org.jbpm.process.workitem.wsht.MinaHTWorkItemHandler;
 
 public class WorkItemHandlerFactory {
 		
-	public static GenericHTWorkItemHandler createInstance(StatefulKnowledgeSession session) {
+	public static GenericHTWorkItemHandler createInstance(StatefulKnowledgeSession session, RestServiceTaskHandler handle ) {
 		GenericHTWorkItemHandler handler = new MinaHTWorkItemHandler(session);
 		session.getWorkItemManager().registerWorkItemHandler("Human Task", handler);
 		
-		RestServiceTaskHandler restHandler = new RestServiceTaskHandler();
-		session.getWorkItemManager().registerWorkItemHandler("RestService", restHandler);
+		//RestServiceTaskHandler restHandler = new RestServiceTaskHandler();
+		session.getWorkItemManager().registerWorkItemHandler("RestService", handle);
 
 		return handler;
 	}

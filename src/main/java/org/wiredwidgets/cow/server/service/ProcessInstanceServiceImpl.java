@@ -4,6 +4,8 @@
  */
 package org.wiredwidgets.cow.server.service;
 
+import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -23,11 +25,11 @@ import org.wiredwidgets.cow.server.api.model.v2.*;
 import org.wiredwidgets.cow.server.api.model.v2.Task;
 import org.wiredwidgets.cow.server.api.service.*;
 import org.wiredwidgets.cow.server.api.service.Variable;
+import org.wiredwidgets.cow.server.completion.Evaluator;
 import org.wiredwidgets.cow.server.completion.EvaluatorFactory;
-import org.wiredwidgets.cow.server.completion.History;
+import org.wiredwidgets.cow.server.completion.ProcessInstanceInfo;
 import org.wiredwidgets.cow.server.repo.ProcessInstanceLogRepository;
 import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
-import static org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY;
 
 
 /**
@@ -46,9 +48,6 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
     
     @Autowired
     TaskService taskService;
-    
-    @Autowired
-    UsersService userService;
     
     @Autowired
     EvaluatorFactory evaluatorFactory;
@@ -168,14 +167,15 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
 		ProcessInstanceLog pil = JPAProcessInstanceDbLog.findProcessInstance(processInstanceId);
 		String exitValue = getProcessInstanceVariable(processInstanceId, PROCESS_EXIT_PROPERTY);
 		org.wiredwidgets.cow.server.api.model.v2.Process process = processService.getV2Process(pil.getProcessId());
-		evaluatorFactory.getProcessEvaluator(
-				String.valueOf(processInstanceId), 
-				process, 
-				new History(taskService.getHistoryActivities(processInstanceId), pil.getStatus(), exitValue))
-				.evaluate();
+		ProcessInstanceInfo info = new ProcessInstanceInfo(taskService.getHistoryActivities(processInstanceId), pil.getStatus(), 
+				getProcessInstanceVariables(processInstanceId));
+		
+		Evaluator evaluator = evaluatorFactory.getProcessEvaluator(String.valueOf(processInstanceId), process, info);
+		evaluator.evaluate();
 		
 		ProcessInstance pi = getProcessInstance(processInstanceId);
 		pi.setProcess(process);
+		pi.getStatusSummaries().addAll(info.getStatusSummary());
         return pi;
     }
 
@@ -241,4 +241,13 @@ public class ProcessInstanceServiceImpl extends AbstractCowServiceImpl implement
         return value;
     }
    
+    private Map<String, String> getProcessInstanceVariables(Long id) {
+    	Map<String, String> vars = new HashMap<String, String>();
+    	List<VariableInstanceLog> logs = JPAProcessInstanceDbLog.findVariableInstances(id);
+    	for (VariableInstanceLog log : logs) {
+    		vars.put(log.getVariableId(), log.getValue());
+    	}
+    	return vars;
+    }
+    
 }

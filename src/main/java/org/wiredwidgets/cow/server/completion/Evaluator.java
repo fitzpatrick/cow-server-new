@@ -23,8 +23,12 @@ public interface Evaluator<T extends Activity> {
 
     void setActivity(T activity);
 
-    void setHistory(History history);
+    void setHistory(ProcessInstanceInfo history);
 
     void setProcessInstanceId(String processInstanceId);
+    
+    void setBranchState(CompletionState state);
+    
+    void setInLoop(boolean inLoop);
 	
 }

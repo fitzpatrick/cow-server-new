@@ -18,23 +18,28 @@ package org.wiredwidgets.cow.server.completion;
 
 
 import org.drools.runtime.process.ProcessInstance;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.wiredwidgets.cow.server.api.model.v2.Exit;
+import org.wiredwidgets.cow.server.transform.v2.bpmn20.Bpmn20ProcessBuilder;
 
 @Component
+@Scope("prototype")
 public class ExitEvaluator extends AbstractEvaluator<Exit> {
     
     @Override
     protected void evaluateInternal() {
+    	
+    	String exitState = info.getVariables().get(Bpmn20ProcessBuilder.PROCESS_EXIT_PROPERTY);
 
-    	if (history.getProcessInstanceState() == ProcessInstance.STATE_COMPLETED 
-    			&& history.getExitState() != null 
-    			&& history.getExitState().equals(activity.getState() )) {
+    	if (info.getProcessInstanceState() == ProcessInstance.STATE_COMPLETED 
+    			&& exitState != null 
+    			&& exitState.equals(activity.getState() )) {
     		
             this.completionState = CompletionState.COMPLETED;
         }
         else {
-            this.completionState = CompletionState.NOT_STARTED;
+            this.completionState = branchState;
         }
     }
      

@@ -22,15 +22,20 @@
 package org.wiredwidgets.cow.server.completion;
 
 public enum CompletionState {
-    
-        // indicates a task or activity that has not been started
-	NOT_STARTED("not started"), 
-        
-        // indicates a task or activity that is currently open
+          
+    // indicates a task or activity that is currently open
 	OPEN("open"), 
         
-        // indicates a task or activity that has been completed
-	COMPLETED("completed");
+    // indicates a task or activity that has been completed
+	COMPLETED("completed"),
+	
+	PLANNED("planned"),
+	
+	CONTINGENT("contingent"),
+	
+	PRECLUDED("precluded");
+	
+	
 
 	private String name;
 

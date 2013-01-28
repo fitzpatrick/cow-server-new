@@ -19,16 +19,27 @@
  * and open the template in the editor.
  */
 
-package org.wiredwidgets.cow.server.transform.v2;
+package org.wiredwidgets.cow.server.transform.v2.bpmn20;
+
+import org.springframework.stereotype.Component;
+import org.wiredwidgets.cow.server.api.model.v2.Script;
+import org.wiredwidgets.cow.server.transform.v2.NodeType;
+import org.wiredwidgets.cow.server.transform.v2.ProcessContext;
 
 /**
- * Logical node types independent of notation system
+ *
  * @author JKRANES
  */
-public enum NodeType {
+@Component
+public class Bpmn20ScriptTaskNodeBuilderFactory extends Bpmn20NodeBuilderFactory<Bpmn20ScriptTaskNodeBuilder, Script> {
 
-    START, END, TASK, DECISION_TASK, LOOP_TASK, SERVICE_TASK, DIVERGING_PARALLEL_GATEWAY, CONVERGING_PARALLEL_GATEWAY,
-    DIVERGING_EXCLUSIVE_GATEWAY, CONVERGING_EXCLUSIVE_GATEWAY,
-    DIVERGING_COMPLEX_GATEWAY, CONVERGING_COMPLEX_GATEWAY, EXIT, SCRIPT, SUBPROCESS, SIGNAL
+    public Bpmn20ScriptTaskNodeBuilderFactory() {
+        super(NodeType.SCRIPT);
+    }
+    
+    @Override
+    public Bpmn20ScriptTaskNodeBuilder createNodeBuilder(ProcessContext context, Script script) {
+        return new Bpmn20ScriptTaskNodeBuilder(context, script);
+    }
 
 }

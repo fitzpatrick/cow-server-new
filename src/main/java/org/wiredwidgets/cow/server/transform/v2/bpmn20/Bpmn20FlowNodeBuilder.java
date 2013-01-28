@@ -88,8 +88,8 @@ public abstract class Bpmn20FlowNodeBuilder<T extends TFlowNode, V extends Activ
         super.getContext().addNode(factory.createSequenceFlow(sequenceFlow));
 
         // incomings and outgoings are required by igrafx       
-        getNode().getOutgoings().add(new QName(sequenceFlow.getId()));
-        targetNode.getIncomings().add(new QName(sequenceFlow.getId()));
+        getNode().getOutgoings().add(new QName("http://www.omg.org/spec/BPMN/20100524/MODEL", sequenceFlow.getId()));
+        targetNode.getIncomings().add(new QName("http://www.omg.org/spec/BPMN/20100524/MODEL", sequenceFlow.getId()));
     }
 
     /**
