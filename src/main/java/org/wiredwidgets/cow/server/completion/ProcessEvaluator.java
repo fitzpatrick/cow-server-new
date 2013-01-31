@@ -29,7 +29,7 @@ public class ProcessEvaluator extends AbstractEvaluator<Activity> {
 	protected void evaluateInternal() {
 		evaluate(super.activity);
                 // process completion state is same as activity
-                if (info.getProcessInstanceState() == ProcessInstance.STATE_ACTIVE) {
+                if (info.getProcessInstanceState() != ProcessInstance.STATE_COMPLETED) {
                     setCompletionState(super.activity.getCompletionState());
                 }
                 else {
