@@ -5,7 +5,9 @@
 package org.wiredwidgets.cow.server.service;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -13,6 +15,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.wiredwidgets.cow.server.api.service.Group;
+import org.wiredwidgets.cow.server.api.service.Membership;
 import org.wiredwidgets.cow.server.api.service.User;
 import org.wiredwidgets.cow.server.helper.LDAPHelper;
 
@@ -39,7 +42,33 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
 
     @Override
     public void createOrUpdateUser(User user) {
-        ldapHelper.createUser(user);
+        List<String> groups = ldapHelper.getLDAPGroups();
+        List<String> users = ldapHelper.getLDAPUsers();
+        boolean userExists = false;
+        
+        Map <String, String> groupMap = new HashMap<String, String>();
+        
+        // Create group map to quickly search to see if group exists
+        for (String group: groups){
+            groupMap.put(group, "1");
+        }
+        
+        for (Membership membership: user.getMemberships()){
+            if (!groupMap.containsKey(membership.getGroup())){
+                ldapHelper.createGroup(membership.getGroup());
+            }
+        }
+        
+        for (String ldapUser: users){
+            if (ldapUser.equals(user.getId())){
+                ldapHelper.updateUser(user);
+                userExists = true;
+                break;
+            }
+        }
+        if (!userExists){
+            ldapHelper.createUser(user);
+        }
     }
 
     @Override
@@ -60,6 +89,7 @@ public class UsersServiceImpl extends AbstractCowServiceImpl implements UsersSer
             
             retGroups.add(temp);
         }
+        
         return retGroups;
     }
 
